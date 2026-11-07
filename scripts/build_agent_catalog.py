@@ -16,6 +16,7 @@ def slim(p):
     sim = p["simulated"]
     return {
         "id": p["id"],
+        "gender": p.get("gender", "men"),  # "men" or "women"
         "title": p["title"],
         "brand": p["brand"],
         "category": p["category"],

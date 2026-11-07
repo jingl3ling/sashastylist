@@ -10,7 +10,9 @@
 
   // Voice arguments are loose ("suits", "formal", "mack weldon"). Map them onto real filter values.
   const pick = (v, options) => options.find((o) => lower(o) === lower(v)) || options.find((o) => lower(o).includes(lower(v)) || lower(v).includes(lower(o)));
-  const resolveDept = (v) => pick(v, Object.keys(DEPTS)) || Object.keys(DEPTS).find((d) => pick(v, DEPTS[d]));
+  // Departments differ by gender (DEPTS for men, DEPTS_W for women); with no gender given, try men then women.
+  const resolveDept = (v, g) => { for (const m of g ? [deptsFor(g)] : [DEPTS, DEPTS_W]) { const d = pick(v, Object.keys(m)) || Object.keys(m).find((k) => pick(v, m[k])); if (d) return d; } };
+  const gender = (v) => { const s = lower(v); return /^(w|women|womens|women's|female|ladies)$/.test(s) ? "women" : /^(m|men|mens|men's|male)$/.test(s) ? "men" : null; };
   const resolve = {
     dept: resolveDept,
     style: (v) => pick(v, [...new Set(P.map((p) => p.style))]),
@@ -25,13 +27,16 @@
 
     // Sets the shop URL so the page filters live, and returns the top 5 matches in page order.
     // size: pass the shopper's size for the garment being searched (jacket "40R", shirt "15.5 / 32-33", waist "32", shoe "10").
+    // gender: "men" or "women" limits results to that department (also accepted as g).
     search(filters = {}) {
       const n = new URLSearchParams(), loose = [];
+      const g = gender(filters.gender ?? filters.g ?? "");
+      if (g) n.set("g", g);
       for (const k of ["q", "dept", "style", "brand", "color", "max_price", "size", "sale"]) {
         const v = filters[k];
         if (v === undefined || v === null || v === "" || v === false) continue;
         if (k === "sale") n.set("sale", "1");
-        else if (resolve[k]) { const r = resolve[k](v); r ? n.set(k, r) : loose.push(v); } // unknown dept/style/brand becomes search text
+        else if (resolve[k]) { const r = resolve[k](v, g); r ? n.set(k, r) : loose.push(v); } // unknown dept/style/brand becomes search text
         else n.set(k, String(v));
       }
       if (loose.length) n.set("q", [n.get("q"), ...loose].filter(Boolean).join(" "));

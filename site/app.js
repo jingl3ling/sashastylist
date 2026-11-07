@@ -12,17 +12,21 @@ const DEPTS = {
   "Ties & formal extras": ["Neckwear", "Formal Accessories"],
   "Accessories": ["Belts", "Socks", "Headwear", "Accessories", "Underwear"],
 };
+// Women's departments (from Mike's Fashion Barn update). Every product has gender "men" or "women".
+const DEPTS_W = {
+  "Dresses": ["Dresses"], "Tops": ["Tops"], "Bottoms": ["Bottoms"], "Outerwear": ["Outerwear"], "Activewear": ["Activewear"],
+  "Swim": ["Swim"], "Shoes": ["Shoes"], "Bags": ["Bags"], "Jewelry & accessories": ["Jewelry", "Accessories"],
+};
 const THEMES = {
-  "formal-wedding": ["Formal wedding", "Black tie, three ways. Every piece down to the socks."],
-  "beach-wedding": ["Beach wedding", "Light suits and linen for a ceremony on the sand."],
+  "formal-wedding": ["Formal wedding", "Black tie, three ways, down to the last piece."],
+  "beach-wedding": ["Beach wedding", "Light layers for a ceremony on the sand."],
   "beach-vacation": ["Beach vacation", "Packed for the water, and for dinner after."],
   "business-casual": ["The office", "Everyday workwear that takes no thought in the morning."],
 };
-const TILES = [
-  ["Suits & tuxedos", "Essential Beige Suit"], ["Shirts & tees", "Blue Oxford Shirt"], ["Knits & sweats", "Waffle Knit Hoodie"],
-  ["Shoes", "Larson Weejuns"], ["Shorts & swim", "Linen Camp Shirt \\| Light Blue|Drift Board"], ["Outerwear", "Denim Trucker"],
-  ["Ties & formal extras", "Solid Knit Navy"], ["Accessories", "Weekender Bag"],
-];
+const TILES = {
+  women: [["Dresses", "Jasmine Fringe"], ["Shoes", "Perfect Emma|Daisie"], ["Bags", "Pesce Raffia"], ["Swim", "Alma One Piece"]],
+  men: [["Suits & tuxedos", "Essential Beige Suit"], ["Shirts & tees", "Blue Oxford Shirt"], ["Shoes", "Larson Weejuns"], ["Shorts & swim", "Linen Camp Shirt \\| Light Blue"]],
+};
 const PAGE = 36;
 const main = document.getElementById("main");
 let P = [], L = [], byId = {}, shown = PAGE;
@@ -33,13 +37,14 @@ const img = (p, i = 0) => IMG + p.images[Math.min(i, p.images.length - 1)].repla
 // "$1,453" and "$740.50": thousands separators, cents only when there are cents.
 const money = (n) => "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-const deptOf = (p) => Object.keys(DEPTS).find((d) => DEPTS[d].includes(p.category));
+const deptsFor = (g) => (g === "women" ? DEPTS_W : DEPTS);
+const deptOf = (p) => { const m = deptsFor(p.gender); return Object.keys(m).find((d) => m[d].includes(p.category)); };
 function title(t) {
-  t = t.replace(/\s\|\s/g, ", ");
+  t = t.replace(/\s(\||::|~)\s/g, ", ");
   if (t === t.toUpperCase()) t = t.toLowerCase().replace(/(^|[\s&(-])([a-z])/g, (m, a, b) => a + b.toUpperCase());
   return t;
 }
-const find = (rx) => P.find((p) => new RegExp(rx, "i").test(p.title));
+const find = (rx, g) => P.find((p) => (!g || p.gender === g) && new RegExp(rx, "i").test(p.title));
 const priceHtml = (p) => { const s = p.simulated; return `<span class="price">${money(s.price)}${s.on_sale ? ` <s>${money(s.compare_at_price)}</s>` : ""}</span>`; };
 const card = (p) => `<a class="card" href="#/product/${p.id}">
   <div class="card-pic"><img src="${img(p)}" alt="${esc(title(p.title))}" loading="lazy"><img src="${img(p, 1)}" alt="" loading="lazy"></div>
@@ -49,45 +54,50 @@ const lookTotal = (l) => lookItems(l).reduce((a, p) => a + p.simulated.price, 0)
 const lookLead = (l) => lookItems(l)[0];
 
 function home() {
-  const h = find("White Dinner Jacket Tuxedo Outfit") || P[0];
-  const tiles = TILES.map(([d, rx]) => { const p = find(rx) || P.find((x) => deptOf(x) === d); const n = P.filter((x) => deptOf(x) === d).length;
-    return `<a class="dept" href="#/shop?dept=${encodeURIComponent(d)}"><div class="dept-pic"><img src="${img(p)}" alt="" loading="lazy"></div><h3>${esc(d)}</h3><p>${n} pieces</p></a>`; }).join("");
+  const a = lookLead(L.find((l) => l.name === "Emerald Satin") || L[0]), b = find("White Dinner Jacket Tuxedo Outfit") || P[0];
+  const print = (p) => `<a class="mat" href="#/product/${p.id}"><div class="mat-pic"><img src="${img(p)}" alt="${esc(title(p.title))}"></div><div class="mat-cap"><span>${esc(p.brand)}</span></div></a>`;
+  const tiles = (g) => TILES[g].map(([d, rx]) => { const p = find(rx, g) || P.find((x) => x.gender === g && deptOf(x) === d); const n = P.filter((x) => x.gender === g && deptOf(x) === d).length;
+    return `<a class="dept" href="#/shop?g=${g}&dept=${encodeURIComponent(d)}"><div class="dept-pic"><img src="${img(p)}" alt="" loading="lazy"></div><h3>${esc(d)}</h3><p>${n} pieces</p></a>`; }).join("");
   main.innerHTML = `
   <div class="container hero">
-    <div><h1>Everything a man wears, under one roof.</h1>
-      <p class="lead">A tuxedo, swim trunks and everything between, picked by hand.</p>
-      <div class="hero-act"><a class="btn" href="#/shop">Shop the barn</a><a class="link" href="#/looks">See the looks</a></div></div>
-    <a class="mat" href="#/product/${h.id}"><div class="mat-pic"><img src="${img(h)}" alt="${esc(h.title)}"></div>
-      <div class="mat-cap"><span>${esc(title(h.title))}</span><span>${esc(h.brand)}</span></div></a>
+    <div><h1>Everything you wear, under one roof.</h1>
+      <p class="lead">Gowns, tuxedos, swimsuits and everything between, picked by hand.</p>
+      <div class="hero-act"><a class="btn" href="#/shop?g=women">Shop women</a><a class="btn" href="#/shop?g=men">Shop men</a><a class="link" href="#/looks">See the looks</a></div></div>
+    <div class="mats">${print(a)}${print(b)}</div>
   </div>
   <section class="sec"><div class="container">
-    <div class="sec-head"><h2>What’s the occasion?</h2><p>Twelve complete outfits, each one ready to wear from jacket to socks.</p></div>
+    <div class="sec-head"><h2>What’s the occasion?</h2><p>Twenty-four complete outfits, each one ready to wear from head to toe.</p></div>
+    <div class="chips who" role="group" aria-label="Show outfits for"><button class="chip" data-g="women" aria-pressed="true">Women</button><button class="chip" data-g="men" aria-pressed="false">Men</button></div>
     <div class="rail-wrap"><div class="rail" role="tablist" aria-label="Occasions">${Object.keys(THEMES).map((k, i) =>
       `<button class="strip" role="tab" id="tab-${k}" aria-selected="${i === 0}" aria-controls="panel" data-k="${k}"><span>${esc(THEMES[k][0])}</span></button>`).join("")}</div>
       <div id="panel" role="tabpanel" class="panel"></div></div>
   </div></section>
   <section class="sec"><div class="container">
     <div class="sec-head"><h2>Walk the aisles</h2><p>${P.length} pieces, from streetwear to black tie.</p></div>
-    <div class="depts">${tiles}</div>
+    <h3 class="aisle">Women</h3><div class="depts">${tiles("women")}</div>
+    <h3 class="aisle">Men</h3><div class="depts">${tiles("men")}</div>
   </div></section>`;
+  let who = "women", cur = "formal-wedding";
   const show = (k) => {
-    const ls = L.filter((l) => l.theme === k), l = ls[0], lead = lookLead(l);
+    cur = k;
+    const ls = L.filter((l) => l.theme === k && l.gender === who), l = ls[0], lead = lookLead(l);
     document.getElementById("panel").innerHTML = `<a class="panel-pic" href="#/looks/${slug(l.name)}"><img src="${img(lead)}" alt="${esc(l.name)}"></a>
       <div><h3>${esc(THEMES[k][0])}</h3><p>${esc(THEMES[k][1])}</p>
       <ul class="panel-list">${ls.map((x) => `<li><a href="#/looks/${slug(x.name)}"><span>${esc(x.name)}</span><span>${x.items.length} pieces</span></a></li>`).join("")}</ul></div>`;
     document.querySelectorAll(".strip").forEach((b) => b.setAttribute("aria-selected", b.dataset.k === k));
   };
+  document.querySelectorAll(".who .chip").forEach((b) => b.addEventListener("click", () => { who = b.dataset.g; document.querySelectorAll(".who .chip").forEach((x) => x.setAttribute("aria-pressed", x === b)); show(cur); }));
   document.querySelectorAll(".strip").forEach((b) => b.addEventListener("click", () => show(b.dataset.k)));
   document.querySelector(".rail").addEventListener("keydown", (e) => {
     if (!["ArrowLeft", "ArrowRight"].includes(e.key)) return;
     const t = [...document.querySelectorAll(".strip")], i = t.indexOf(document.activeElement), n = t[(i + (e.key === "ArrowRight" ? 1 : t.length - 1)) % t.length];
     n.focus(); show(n.dataset.k);
   });
-  show("formal-wedding");
+  show(cur);
 }
 
 // Filtering and sorting live outside shop() so window.Barn (barn.js) gets exactly what the page shows.
-const filtersFrom = (q) => ({ dept: q.get("dept"), style: q.get("style"), brand: q.get("brand"), color: q.get("color"), max_price: q.get("max_price"), size: q.get("size"), sale: q.get("sale"), q: q.get("q"), sort: q.get("sort") || "featured" });
+const filtersFrom = (q) => ({ g: q.get("g"), dept: q.get("dept"), style: q.get("style"), brand: q.get("brand"), color: q.get("color"), max_price: q.get("max_price"), size: q.get("size"), sale: q.get("sale"), q: q.get("q"), sort: q.get("sort") || "featured" });
 // In stock in the shopper's size. Sizes differ by category: "40R", "15.5 / 32-33", "10" (shoes); a bare waist like "32" also matches "32x30" and "32W | 33-35L".
 const normSize = (s) => String(s).toLowerCase().replace(/\s+/g, "");
 function inSize(p, want) {
@@ -96,7 +106,7 @@ function inSize(p, want) {
   return p.sizes.some((s) => p.simulated.inventory[s] > 0 && (normSize(s) === w || (waist && waist.test(normSize(s)))));
 }
 function matches(p, f, skip) {
-  return (skip === "dept" || !f.dept || deptOf(p) === f.dept) && (skip === "style" || !f.style || p.style === f.style) && (skip === "brand" || !f.brand || p.brand === f.brand) && (!f.sale || p.simulated.on_sale)
+  return (skip === "g" || !f.g || p.gender === f.g) && (skip === "dept" || !f.dept || deptOf(p) === f.dept) && (skip === "style" || !f.style || p.style === f.style) && (skip === "brand" || !f.brand || p.brand === f.brand) && (!f.sale || p.simulated.on_sale)
     && (!f.color || (p.colors.join(" ") + " " + p.title).toLowerCase().includes(String(f.color).toLowerCase()))
     && (!(+f.max_price > 0) || p.simulated.price <= +f.max_price)
     && (!f.size || inSize(p, f.size))
@@ -115,14 +125,15 @@ function shop(q) {
   const match = (p, skip) => matches(p, f, skip);
   const r = sortProducts(P.filter((p) => match(p)), f.sort);
   const extra = [f.color && `in ${f.color}`, +f.max_price > 0 && `under ${money(+f.max_price)}`, f.size && `size ${f.size}`].filter(Boolean).join(" · ");
-  const group = (name, k, vals) => `<div class="fgroup"><h2>${name}</h2>${vals.map(([v, n]) => `<a href="${link(k, v)}"${f[k] === v ? ' aria-current="true"' : ""}><span>${esc(v)}</span><span>${n}</span></a>`).join("")}</div>`;
+  const group = (name, k, vals) => `<div class="fgroup"><h2>${name}</h2>${vals.map(([v, n, lab]) => `<a href="${link(k, v)}"${f[k] === v ? ' aria-current="true"' : ""}><span>${esc(lab || v)}</span><span>${n}</span></a>`).join("")}</div>`;
   const count = (fn, skip) => { const c = {}; P.filter((p) => match(p, skip)).forEach((p) => { const v = fn(p); c[v] = (c[v] || 0) + 1; }); return c; };
-  const dc = count(deptOf, "dept"), sc = count((p) => p.style, "style"), bc = count((p) => p.brand, "brand");
-  const head = f.q ? `Results for "${f.q}"` : f.sale ? "On sale" : f.dept || f.style || f.brand || "All clothing";
+  const gc = count((p) => p.gender, "g"), dc = count(deptOf, "dept"), sc = count((p) => p.style, "style"), bc = count((p) => p.brand, "brand");
+  const head = f.q ? `Results for "${f.q}"` : f.sale ? "On sale" : f.dept || f.style || f.brand || ({ women: "Women", men: "Men" })[f.g] || "All clothing";
   main.innerHTML = `<div class="container"><div class="shop-head"><h1>${esc(head)}</h1></div>
    <div class="shop"><details class="filters" ${innerWidth > 960 ? "open" : ""}><summary>Filter</summary>
-    ${group("Department", "dept", Object.keys(DEPTS).filter((d) => dc[d]).map((d) => [d, dc[d]]))}
-    ${group("Style", "style", ["Formal", "Business Casual", "Casual", "Streetwear", "Athletic"].filter((s) => sc[s]).map((s) => [s, sc[s]]))}
+    ${group("Shop", "g", [["women", gc.women || 0, "Women"], ["men", gc.men || 0, "Men"]])}
+    ${group("Department", "dept", Object.keys(dc).filter((d) => d !== "undefined").sort((a, b) => dc[b] - dc[a]).map((d) => [d, dc[d]]))}
+    ${group("Style", "style", ["Formal", "Business Casual", "Casual", "Streetwear", "Athletic", "Resort"].filter((s) => sc[s]).map((s) => [s, sc[s]]))}
     ${group("Brand", "brand", Object.entries(bc).sort((a, b) => b[1] - a[1]).slice(0, 10))}
     <div class="fgroup"><a href="${link("sale", "1")}"${f.sale ? ' aria-current="true"' : ""}><span>On sale only</span></a></div>
    </details>
@@ -139,8 +150,8 @@ function product(id) {
   const p = byId[id]; if (!p) return notFound();
   const d = deptOf(p), inv = p.simulated.inventory;
   const looks = L.filter((l) => l.items.some((i) => i.product_id === id));
-  const rel = P.filter((x) => x.subcategory === p.subcategory && x.id !== id && x.brand !== p.brand).concat(P.filter((x) => x.category === p.category && x.id !== id)).filter((x, i, a) => a.indexOf(x) === i).slice(0, 4);
-  main.innerHTML = `<div class="container"><p class="crumb"><a class="link" href="#/shop?dept=${encodeURIComponent(d)}">${esc(d)}</a></p>
+  const same = P.filter((x) => x.gender === p.gender && x.id !== id), rel = same.filter((x) => x.subcategory === p.subcategory && x.brand !== p.brand).concat(same.filter((x) => x.category === p.category)).filter((x, i, a) => a.indexOf(x) === i).slice(0, 4);
+  main.innerHTML = `<div class="container"><p class="crumb"><a class="link" href="#/shop?g=${p.gender}&dept=${encodeURIComponent(d)}">${esc(d)}</a></p>
    <div class="pdp"><div class="gal"><div class="thumbs">${p.images.map((_, i) => `<button aria-label="Photo ${i + 1}" aria-pressed="${i === 0}" data-i="${i}"><img src="${img(p, i)}" alt=""></button>`).join("")}</div>
      <div class="gal-main"><img id="big" src="${img(p)}" alt="${esc(title(p.title))}"></div></div>
     <div class="info"><div class="brand">${esc(p.brand)}</div><h1>${esc(title(p.title))}</h1>${priceHtml(p)}
@@ -165,7 +176,7 @@ function product(id) {
 }
 
 function looks() {
-  main.innerHTML = `<div class="container"><div class="shop-head"><h1>Looks</h1></div>${Object.keys(THEMES).map((k) => `<section class="look-group"><h2>${esc(THEMES[k][0])}</h2><div class="looks">${L.filter((l) => l.theme === k).map((l) =>
+  main.innerHTML = `<div class="container"><div class="shop-head"><h1>Looks</h1></div>${Object.keys(THEMES).map((k) => `<section class="look-group"><h2>${esc(THEMES[k][0])}</h2><div class="looks">${L.filter((l) => l.theme === k).sort((a, b) => (a.gender < b.gender ? 1 : a.gender > b.gender ? -1 : 0)).map((l) =>
     `<a class="dept look-card" href="#/looks/${slug(l.name)}"><div class="dept-pic"><img src="${img(lookLead(l))}" alt="" loading="lazy"></div><h3>${esc(l.name)}</h3><p>${esc(l.description)}</p></a>`).join("")}</div></section>`).join("")}</div>`;
 }
 
@@ -192,8 +203,8 @@ function route() {
   else if (parts[0] === "stylist") stylistPage(); // outfit board, site/board.js
   else home();
   if (!q.has("sort")) scrollTo(0, 0);
-  document.querySelectorAll(".nav-l a").forEach((a) => { const h = a.getAttribute("href"); const on = h === "#/shop?sale=1" ? q.has("sale") : h === "#/shop" ? parts[0] === "shop" && !q.has("sale") : parts[0] === "looks"; on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });
-  document.title = "Men’s Fashion Barn";
+  document.querySelectorAll(".nav-l a").forEach((a) => { const h = a.getAttribute("href"); const on = h === "#/shop?sale=1" ? q.has("sale") : h === "#/looks" ? parts[0] === "looks" : parts[0] === "shop" && h.endsWith("g=" + q.get("g")); on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });
+  document.title = "Fashion Barn";
 }
 
 document.getElementById("search").addEventListener("submit", (e) => { e.preventDefault(); const v = document.getElementById("q").value.trim(); location.hash = v ? "#/shop?q=" + encodeURIComponent(v) : "#/shop"; });
@@ -202,5 +213,6 @@ addEventListener("hashchange", route);
 // Wait for every page script (barn.js, bag.js, board.js, avatar) before the first route: the catalog can arrive
 // before a script that a page needs (e.g. stylistPage in board.js) has finished downloading.
 const domReady = new Promise((r) => (document.readyState === "loading" ? addEventListener("DOMContentLoaded", r, { once: true }) : r()));
-const CATALOG = Promise.all([fetch(DATA + "products.json").then((r) => r.json()), fetch(DATA + "outfits.json").then((r) => r.json()), domReady]).then(([a, b]) => { P = a; L = b; a.forEach((p) => (byId[p.id] = p)); route(); })
+const V = "?v=" + (window.ASSET_V || Date.now()); // same freshness rule as the CSS/JS in index.html
+const CATALOG = Promise.all([fetch(DATA + "products.json" + V).then((r) => r.json()), fetch(DATA + "outfits.json" + V).then((r) => r.json()), domReady]).then(([a, b]) => { P = a; L = b; a.forEach((p) => (byId[p.id] = p)); route(); })
   .catch((e) => { console.error("Store failed to start:", e); main.innerHTML = `<div class="container"><p class="empty">The catalog didn’t load. Serve the project root over HTTP, then open /site/.</p></div>`; });

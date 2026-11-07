@@ -1,6 +1,338 @@
 [
  {
   "theme": "formal-wedding",
+  "name": "Black Tulle Gown",
+  "description": "A full black gown for a black-tie evening.",
+  "items": [
+   {
+    "slot": "Gown",
+    "product_id": "WW-0195"
+   },
+   {
+    "slot": "Heels",
+    "product_id": "WW-0338"
+   },
+   {
+    "slot": "Clutch",
+    "product_id": "WW-0053"
+   },
+   {
+    "slot": "Earrings",
+    "product_id": "WW-0255"
+   },
+   {
+    "slot": "Bracelets",
+    "product_id": "WW-0248"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "formal-wedding",
+  "name": "Emerald Satin",
+  "description": "Deep green satin with gold at the ankle and ear.",
+  "items": [
+   {
+    "slot": "Maxi Dress",
+    "product_id": "WW-0213"
+   },
+   {
+    "slot": "Heels",
+    "product_id": "WW-0335"
+   },
+   {
+    "slot": "Clutch",
+    "product_id": "WW-0054"
+   },
+   {
+    "slot": "Earrings",
+    "product_id": "WW-0253"
+   },
+   {
+    "slot": "Necklaces",
+    "product_id": "WW-0265"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "formal-wedding",
+  "name": "Burgundy Sequins",
+  "description": "A sequin maxi for a wedding with a dance floor.",
+  "items": [
+   {
+    "slot": "Maxi Dress",
+    "product_id": "WW-0221"
+   },
+   {
+    "slot": "Heels",
+    "product_id": "WW-0332"
+   },
+   {
+    "slot": "Clutch",
+    "product_id": "WW-0053"
+   },
+   {
+    "slot": "Earrings",
+    "product_id": "WW-0258"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "beach-wedding",
+  "name": "Sunset Maxi",
+  "description": "A light maxi that moves in the sea air.",
+  "items": [
+   {
+    "slot": "Maxi Dress",
+    "product_id": "WW-0209"
+   },
+   {
+    "slot": "Sandals",
+    "product_id": "WW-0360"
+   },
+   {
+    "slot": "Clutch",
+    "product_id": "WW-0055"
+   },
+   {
+    "slot": "Earrings",
+    "product_id": "WW-0257"
+   },
+   {
+    "slot": "Bracelets",
+    "product_id": "WW-0246"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "beach-wedding",
+  "name": "Garden Party Dress",
+  "description": "A printed dress with raffia heels for an afternoon ceremony.",
+  "items": [
+   {
+    "slot": "Dress",
+    "product_id": "WW-0151"
+   },
+   {
+    "slot": "Heels",
+    "product_id": "WW-0334"
+   },
+   {
+    "slot": "Clutch",
+    "product_id": "WW-0052"
+   },
+   {
+    "slot": "Earrings",
+    "product_id": "WW-0252"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "beach-wedding",
+  "name": "Easy Jumpsuit",
+  "description": "A jumpsuit for guests who would rather skip the dress.",
+  "items": [
+   {
+    "slot": "Jumpsuit",
+    "product_id": "WW-0201"
+   },
+   {
+    "slot": "Sandals",
+    "product_id": "WW-0359"
+   },
+   {
+    "slot": "Clutch",
+    "product_id": "WW-0051"
+   },
+   {
+    "slot": "Necklaces",
+    "product_id": "WW-0269"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "beach-vacation",
+  "name": "Poolside One-Piece",
+  "description": "A one-piece, a wrap and a wide hat for a long day by the water.",
+  "items": [
+   {
+    "slot": "One-Piece",
+    "product_id": "WW-0412"
+   },
+   {
+    "slot": "Cover-Up",
+    "product_id": "WW-0409"
+   },
+   {
+    "slot": "Sandals",
+    "product_id": "WW-0360"
+   },
+   {
+    "slot": "Hats",
+    "product_id": "WW-0011"
+   },
+   {
+    "slot": "Sunglasses",
+    "product_id": "WW-0020"
+   },
+   {
+    "slot": "Tote",
+    "product_id": "WW-0072"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "beach-vacation",
+  "name": "Bikini and Pareo",
+  "description": "A bikini with a pareo that doubles as a skirt for lunch.",
+  "items": [
+   {
+    "slot": "Bikini Top",
+    "product_id": "WW-0399"
+   },
+   {
+    "slot": "Bikini Bottom",
+    "product_id": "WW-0389"
+   },
+   {
+    "slot": "Cover-Up",
+    "product_id": "WW-0401"
+   },
+   {
+    "slot": "Sandals",
+    "product_id": "WW-0359"
+   },
+   {
+    "slot": "Hats",
+    "product_id": "WW-0011"
+   },
+   {
+    "slot": "Tote",
+    "product_id": "WW-0072"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "beach-vacation",
+  "name": "Boardwalk Mini",
+  "description": "A simple mini dress for dinner after the beach.",
+  "items": [
+   {
+    "slot": "Mini Dress",
+    "product_id": "WW-0233"
+   },
+   {
+    "slot": "Sandals",
+    "product_id": "WW-0359"
+   },
+   {
+    "slot": "Sunglasses",
+    "product_id": "WW-0020"
+   },
+   {
+    "slot": "Bracelets",
+    "product_id": "WW-0246"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "business-casual",
+  "name": "The Power Suit",
+  "description": "A sharp blazer and wide-leg trouser for the big meeting.",
+  "items": [
+   {
+    "slot": "Blazer",
+    "product_id": "WW-0278"
+   },
+   {
+    "slot": "Trousers",
+    "product_id": "WW-0147"
+   },
+   {
+    "slot": "Blouse",
+    "product_id": "WW-0427"
+   },
+   {
+    "slot": "Loafers",
+    "product_id": "WW-0353"
+   },
+   {
+    "slot": "Tote",
+    "product_id": "WW-0071"
+   },
+   {
+    "slot": "Earrings",
+    "product_id": "WW-0252"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "business-casual",
+  "name": "Knit and Trouser",
+  "description": "A fine knit over a straight trouser for everyday work.",
+  "items": [
+   {
+    "slot": "Knitwear",
+    "product_id": "WW-0460"
+   },
+   {
+    "slot": "Trousers",
+    "product_id": "WW-0132"
+   },
+   {
+    "slot": "Loafers",
+    "product_id": "WW-0353"
+   },
+   {
+    "slot": "Tote",
+    "product_id": "WW-0071"
+   },
+   {
+    "slot": "Necklaces",
+    "product_id": "WW-0265"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "business-casual",
+  "name": "Workday Dress",
+  "description": "One dress, one jacket, and the morning is solved.",
+  "items": [
+   {
+    "slot": "Dress",
+    "product_id": "WW-0150"
+   },
+   {
+    "slot": "Blazer",
+    "product_id": "WW-0281"
+   },
+   {
+    "slot": "Heels",
+    "product_id": "WW-0347"
+   },
+   {
+    "slot": "Handbag",
+    "product_id": "WW-0056"
+   },
+   {
+    "slot": "Earrings",
+    "product_id": "WW-0254"
+   }
+  ],
+  "gender": "women"
+ },
+ {
+  "theme": "formal-wedding",
   "name": "Classic Black Tuxedo",
   "description": "The traditional black-tie choice for an evening wedding.",
   "items": [
@@ -40,7 +372,8 @@
     "slot": "Socks",
     "product_id": "MW-0312"
    }
-  ]
+  ],
+  "gender": "men"
  },
  {
   "theme": "formal-wedding",
@@ -79,7 +412,8 @@
     "slot": "Socks",
     "product_id": "MW-0312"
    }
-  ]
+  ],
+  "gender": "men"
  },
  {
   "theme": "formal-wedding",
@@ -118,7 +452,8 @@
     "slot": "Socks",
     "product_id": "MW-0312"
    }
-  ]
+  ],
+  "gender": "men"
  },
  {
   "theme": "beach-wedding",
@@ -145,7 +480,8 @@
     "slot": "Pocket Square",
     "product_id": "MW-0143"
    }
-  ]
+  ],
+  "gender": "men"
  },
  {
   "theme": "beach-wedding",
@@ -176,7 +512,8 @@
     "slot": "Bow Tie",
     "product_id": "MW-0196"
    }
-  ]
+  ],
+  "gender": "men"
  },
  {
   "theme": "beach-wedding",
@@ -203,7 +540,8 @@
     "slot": "Necktie",
     "product_id": "MW-0205"
    }
-  ]
+  ],
+  "gender": "men"
  },
  {
   "theme": "beach-vacation",
@@ -230,7 +568,8 @@
     "slot": "Hat",
     "product_id": "MW-0158"
    }
-  ]
+  ],
+  "gender": "men"
  },
  {
   "theme": "beach-vacation",
@@ -257,7 +596,8 @@
     "slot": "Bag",
     "product_id": "MW-0008"
    }
-  ]
+  ],
+  "gender": "men"
  },
  {
   "theme": "beach-vacation",
@@ -284,7 +624,8 @@
     "slot": "Sunglasses",
     "product_id": "MW-0012"
    }
-  ]
+  ],
+  "gender": "men"
  },
  {
   "theme": "business-casual",
@@ -315,7 +656,8 @@
     "slot": "Socks",
     "product_id": "MW-0312"
    }
-  ]
+  ],
+  "gender": "men"
  },
  {
   "theme": "business-casual",
@@ -346,7 +688,8 @@
     "slot": "Socks",
     "product_id": "MW-0331"
    }
-  ]
+  ],
+  "gender": "men"
  },
  {
   "theme": "business-casual",
@@ -373,6 +716,7 @@
     "slot": "Socks",
     "product_id": "MW-0329"
    }
-  ]
+  ],
+  "gender": "men"
  }
 ]
