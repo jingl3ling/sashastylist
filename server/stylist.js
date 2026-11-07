@@ -89,7 +89,13 @@ export function validate(result, budget) {
       return false
     })
   if (!catalog) warnings.push('Catalog not loaded; product ids and totals were not validated')
-  return { ...result, looks, warnings }
+  // If looks were dropped, the agent's summary describes looks that no longer exist.
+  const dropped = result.looks.length - looks.length
+  const spoken_summary =
+    dropped > 0 && looks.length > 0
+      ? `I put together ${looks.length} ${looks.length === 1 ? 'look' : 'looks'}${budget ? ` under $${budget}` : ''}: ${looks.map((l) => l.outfit_name).join(' and ')}.`
+      : result.spoken_summary
+  return { ...result, spoken_summary, looks, warnings }
 }
 
 export async function* liveRun(req) {
