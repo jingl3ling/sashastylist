@@ -68,6 +68,8 @@ export interface RouterOptions {
   styleOutfit: StyleOutfitFn;
   /** Sent to the stylist as shopper_id (memory key). Default "demo-shopper" (pal/demo-shopper.json). */
   shopperId?: string;
+  /** Ask the backend for preset looks (no agent run). Backup for the demo only; default off. */
+  instant?: boolean;
   spendLimitUsd?: number;
   /** Safety net on top of the client's own timeout. */
   styleOutfitTimeoutMs?: number;
@@ -341,6 +343,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         budget_usd: capped,
         ...(a.notes ? { notes: a.notes as string } : {}),
         ...(gender ? { gender } : {}),
+        ...(opts.instant ? { instant: true } : {}),
         ...(a.rework_slot && a.rework_feedback
           ? { rework: { slot: a.rework_slot as string, feedback: a.rework_feedback as string } }
           : {}),
@@ -426,11 +429,15 @@ export function normalizeGender(v: string | undefined): "men" | "women" | undefi
 export function stylistResultText(o: ReturnType<typeof compactStylist>): string {
   const looks = o.looks.map((l, n) => {
     const items = (l.items ?? [])
-      .map((it) => ("product_id" in it ? `${it.slot} is product_id ${it.product_id}` : `${it.slot} is the shopper's own ${it.closet_item}`))
+      .map((it) =>
+        "product_id" in it
+          ? `${it.slot} is product_id ${it.product_id}${"size" in it && it.size ? `, size ${it.size}` : ""}`
+          : `${it.slot} is the shopper's own ${it.closet_item}`,
+      )
       .join("; ");
     return `Look ${n + 1}, ${l.outfit_name}, ${l.total_usd} dollars: ${items}.`;
   });
-  return `STYLIST RESULT, not said by the shopper. The looks are on the outfit board now. spoken_summary: ${o.spoken_summary} ${looks.join(" ")} Say spoken_summary in your own voice and ask which look the shopper likes.`;
+  return `STYLIST RESULT, not said by the shopper. The looks are on the outfit board now. spoken_summary: ${o.spoken_summary} ${looks.join(" ")} Say spoken_summary in your own voice and ask which look the shopper likes. When adding an item to the bag, use the size listed here.`;
 }
 
 function compactStylist(res: StylistResult) {
@@ -441,7 +448,7 @@ function compactStylist(res: StylistResult) {
       total_usd: l.total_usd,
       items: (l.items ?? []).map((it) =>
         it.product_id
-          ? { product_id: it.product_id, slot: it.slot }
+          ? { product_id: it.product_id, slot: it.slot, ...(it.size ? { size: it.size } : {}) }
           : { closet_item: clip(it.closet_item ?? "", SHORT_NAME_CHARS), slot: it.slot },
       ),
     })),

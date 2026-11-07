@@ -113,25 +113,45 @@
       return { ok: true, looks: result.looks.length };
     },
 
-    // One row per agent step. Same id again updates that row. status: "start" | "end" | "blocked".
+    // Agent steps, one row per distinct label: the same id again updates its step, and a new step with a label
+    // already shown joins that row with a count ("Searching the catalog ×7") instead of repeating it.
+    // A row shows "start" while any of its steps runs, "blocked" if any is blocked, else "end".
     addFeedStep({ id, label, status = "start" } = {}) {
       const list = document.getElementById("feed-slot");
       if (!list || !id) return { ok: false };
-      let li = list.querySelector(`[data-id="${CSS.escape(String(id))}"]`);
-      if (!li) { li = document.createElement("li"); li.dataset.id = id; list.append(li); }
-      if (label) li.textContent = label;
-      li.dataset.status = status;
+      id = String(id);
+      let row = feed.byId.get(id);
+      if (!row) {
+        const key = String(label || id).trim();
+        row = feed.byLabel.get(key);
+        if (!row) {
+          row = { key, steps: new Map(), li: document.createElement("li") };
+          feed.byLabel.set(key, row);
+          list.append(row.li);
+        }
+        feed.byId.set(id, row);
+      }
+      row.steps.set(id, status);
+      const states = [...row.steps.values()], n = row.steps.size;
+      row.li.dataset.status = states.includes("blocked") ? "blocked" : states.includes("start") ? "start" : "end";
+      // Label and count share one element: the row is a two-column grid (status mark, text).
+      const text = document.createElement("span");
+      text.textContent = row.key;
+      if (n > 1) { const c = document.createElement("span"); c.className = "feed-count"; c.textContent = ` ×${n}`; text.append(c); }
+      row.li.replaceChildren(text);
       list.closest(".stylist-feed").hidden = false;
       return { ok: true };
     },
 
     resetFeed() {
       const list = document.getElementById("feed-slot");
+      feed.byId.clear(); feed.byLabel.clear();
       if (list) { list.replaceChildren(); list.closest(".stylist-feed").hidden = true; }
       return { ok: true };
     },
   };
   const count = () => Barn.getBag().count;
+  const feed = { byId: new Map(), byLabel: new Map() }; // activity feed rows (see addFeedStep)
 
   Barn.ready = CATALOG.then(() => { if (!P.length) throw new Error("The catalog did not load"); return Barn; });
   window.Barn = Barn;

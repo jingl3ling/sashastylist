@@ -34,7 +34,7 @@ const pal = {
       // raven-2 over raven-1: better camera understanding, plus visual history
       // so Sasha can refer back to items shown earlier in the call.
       perception_model: "raven-2",
-      callouts: "off", // She reviews outfits only when asked.
+      callouts: "on", // Lets her react to the twirl without waiting for him to speak.
       visual_awareness_queries: [
         "What clothing is the user wearing? Describe each visible garment, its color, and how the pieces go together.",
         "Is the user holding a clothing item, shoe, or accessory up to the camera? If so, what is it?",
