@@ -80,4 +80,9 @@ try {
   console.log('avatar routes not found; skipping')
 }
 
+// Arjun's public catalog MCP server (POST /mcp) for the ZooWork agent. Read-only demo data, no auth.
+const { mountMcp } = await import('./mcp.js')
+mountMcp(app)
+console.log('catalog MCP mounted at /mcp')
+
 app.listen(PORT, () => console.log(`stylist backend on :${PORT} (mode: ${MODE})`))
