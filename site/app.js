@@ -105,12 +105,55 @@ function inSize(p, want) {
   const w = normSize(want), waist = /^\d+$/.test(w) ? new RegExp(`^${w}[wx]`) : null;
   return p.sizes.some((s) => p.simulated.inventory[s] > 0 && (normSize(s) === w || (waist && waist.test(normSize(s)))));
 }
+// Search words. Each entry maps what shoppers say to what the catalog calls it; any listed term counts.
+const SYNONYMS = [
+  [/\b(swim shorts?|swim trunks?|bathing suits?|swim ?suits?|swimwear|board ?shorts?|trunks)\b/g, ["swim"]],
+  [/\b(tennis shoes?|running shoes?|trainers?|kicks|runners)\b/g, ["sneakers"]],
+  [/\b(dress shoes?)\b/g, ["oxford", "derby", "loafers", "dress shoe"]],
+  [/\b(flip ?flops?|slides)\b/g, ["sandals", "flip flop"]],
+  [/\b(slacks|dress pants|dress trousers)\b/g, ["dress pants", "trousers"]],
+  [/\b(khakis?)\b/g, ["chinos", "khaki"]],
+  [/\b(pants)\b/g, ["pants", "trousers", "chinos", "joggers"]],
+  [/\b(sweats|sweatpants)\b/g, ["joggers"]],
+  [/\b(t[- ]?shirts?|tees?)\b/g, ["tee", "t-shirt"]],
+  [/\b(button[- ]?downs?|button[- ]?ups?)\b/g, ["button-up", "button down"]],
+  [/\b(jumpers?|pullovers?)\b/g, ["sweater"]],
+  [/\b(sportcoats?|sports? coats?|blazers?)\b/g, ["blazer", "sport coat"]],
+  [/\b(tux|tuxes|tuxedos?)\b/g, ["tuxedo"]],
+  [/\b(shades|sunnies)\b/g, ["sunglasses"]],
+  [/\b(boxers|briefs|undies)\b/g, ["underwear", "boxer", "brief"]],
+  [/\b(purses?)\b/g, ["handbag", "bag"]],
+];
+const SKIP_WORDS = new Set(["a", "an", "and", "the", "some", "for", "of", "pair", "with", "mens", "men", "womens", "women"]);
+const wordRe = (term) => new RegExp("\\b" + term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(s|es)?\\b");
+
+// The query as a list of groups. A product must match one term from every group.
+function searchGroups(q) {
+  let text = q.toLowerCase().replace(/['’]/g, "");
+  const groups = [];
+  for (const [phrase, terms] of SYNONYMS) {
+    text = text.replace(phrase, () => {
+      groups.push(terms);
+      return " ";
+    });
+  }
+  for (const w of text.split(/\s+/)) if (w && !SKIP_WORDS.has(w)) groups.push([w]);
+  return groups.map((terms) => terms.map(wordRe));
+}
+
+const haystacks = new Map();
+function textMatch(p, q) {
+  if (!haystacks.has(p.id)) haystacks.set(p.id, [p.title, p.brand, p.category, p.subcategory, ...p.colors].join(" ").toLowerCase());
+  const hay = haystacks.get(p.id);
+  return searchGroups(q).every((terms) => terms.some((re) => re.test(hay)));
+}
+
 function matches(p, f, skip) {
   return (skip === "g" || !f.g || p.gender === f.g) && (skip === "dept" || !f.dept || deptOf(p) === f.dept) && (skip === "style" || !f.style || p.style === f.style) && (skip === "brand" || !f.brand || p.brand === f.brand) && (!f.sale || p.simulated.on_sale)
     && (!f.color || (p.colors.join(" ") + " " + p.title).toLowerCase().includes(String(f.color).toLowerCase()))
     && (!(+f.max_price > 0) || p.simulated.price <= +f.max_price)
     && (!f.size || inSize(p, f.size))
-    && (!f.q || f.q.toLowerCase().split(/\s+/).every((w) => (p.title + " " + p.brand + " " + p.subcategory + " " + p.colors.join(" ")).toLowerCase().includes(w)));
+    && (!f.q || textMatch(p, f.q));
 }
 function sortProducts(r, sort) {
   if (sort === "low") return [...r].sort((a, b) => a.simulated.price - b.simulated.price);
