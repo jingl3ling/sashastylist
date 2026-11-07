@@ -9,9 +9,9 @@ Say your lines as written, using your own name. Sasha's replies are live, so the
 | # | You say | What should happen | Sasha, roughly |
 |---|---|---|---|
 | 1 | *(Click Start video call in the store.)* | Sasha appears beside the store. | Introduces herself, says how this works, and asks your name. |
-| 2 | "I'm Mike." | The camera sees your outfit. | Asks for a twirl and starts reacting right away. |
-| 3 | *(Step back and turn around, if you have room.)* | She talks through what she sees. | Scores it out of ten, then asks what styles you like. |
-| 4 | "Clean and classic. Nothing too flashy." | Nothing yet. | Asks what you're shopping for. |
+| 2 | "I'm Mike." | The camera sees your outfit. | Says what she can see, invites you to stand if you can, and asks what styles you like, all in one go. |
+| 3 | *(Stand up if you have room. Don't wait to answer.)* | She keeps talking while you move. | Waits for your answer. |
+| 4 | "Clean and classic. Nothing too flashy." | Nothing yet. | Gives your outfit a quick score out of ten, then asks what you're shopping for. |
 | 5 | "I've got a wedding in Italy this summer." | `search_products` with style Formal. The shop filters itself. | Gets excited, then asks your size so she can search the racks. |
 | 6 | "Forty regular, large in shirts, thirty-two waist, size ten shoes. I've got about fifteen hundred dollars, and I was thinking a tuxedo." | `search_products` for "tuxedo outfit". Ten full tuxedos appear. | Backs the idea, then asks if she can show something lighter for summer in Italy. |
 | 7 | "Sure, show me." | `search_products` for "linen suit", then `show_product` opens the Ink Blue Double Breasted Linen Suit (MW-0374, $595). | One reason linen works for the heat, and asks what you think. |
@@ -29,8 +29,8 @@ Say your lines as written, using your own name. Sasha's replies are live, so the
 
 | Problem | What to do |
 |---|---|
-| Sasha doesn't ask for the twirl | Say: "Want to see what I'm wearing?" |
-| She waits after the twirl | Say: "What do you see?" |
+| Sasha doesn't mention your outfit | Say: "Want to see what I'm wearing?" |
+| She pauses while you stand | Just answer her style question. |
 | Sasha doesn't nudge at step 6 | Say: "Is a tux too much for summer in Italy?" |
 | The shop doesn't move | Say the request again using the exact product words, like "linen suit". |
 | Sasha goes quiet during the run | Ask: "How's it looking?" |
