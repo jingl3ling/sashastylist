@@ -84,15 +84,27 @@ function home() {
   show("formal-wedding");
 }
 
-function shop(q) {
-  const f = { dept: q.get("dept"), style: q.get("style"), brand: q.get("brand"), sale: q.get("sale"), q: q.get("q"), sort: q.get("sort") || "featured" };
-  const link = (k, v) => { const n = new URLSearchParams(q); n.delete("sort"); if (f.sort !== "featured") n.set("sort", f.sort); if (n.get(k) === v) n.delete(k); else n.set(k, v); return "#/shop?" + n; };
-  const match = (p, skip) => (skip === "dept" || !f.dept || deptOf(p) === f.dept) && (skip === "style" || !f.style || p.style === f.style) && (skip === "brand" || !f.brand || p.brand === f.brand) && (!f.sale || p.simulated.on_sale)
+// Filtering and sorting live outside shop() so window.Barn (barn.js) gets exactly what the page shows.
+const filtersFrom = (q) => ({ dept: q.get("dept"), style: q.get("style"), brand: q.get("brand"), color: q.get("color"), max_price: q.get("max_price"), sale: q.get("sale"), q: q.get("q"), sort: q.get("sort") || "featured" });
+function matches(p, f, skip) {
+  return (skip === "dept" || !f.dept || deptOf(p) === f.dept) && (skip === "style" || !f.style || p.style === f.style) && (skip === "brand" || !f.brand || p.brand === f.brand) && (!f.sale || p.simulated.on_sale)
+    && (!f.color || (p.colors.join(" ") + " " + p.title).toLowerCase().includes(String(f.color).toLowerCase()))
+    && (!(+f.max_price > 0) || p.simulated.price <= +f.max_price)
     && (!f.q || f.q.toLowerCase().split(/\s+/).every((w) => (p.title + " " + p.brand + " " + p.subcategory + " " + p.colors.join(" ")).toLowerCase().includes(w)));
-  let r = P.filter((p) => match(p));
-  if (f.sort === "low") r = [...r].sort((a, b) => a.simulated.price - b.simulated.price);
-  if (f.sort === "high") r = [...r].sort((a, b) => b.simulated.price - a.simulated.price);
-  if (f.sort === "featured") { const h = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7); r = [...r].sort((a, b) => h(a.id) - h(b.id)); }
+}
+function sortProducts(r, sort) {
+  if (sort === "low") return [...r].sort((a, b) => a.simulated.price - b.simulated.price);
+  if (sort === "high") return [...r].sort((a, b) => b.simulated.price - a.simulated.price);
+  const h = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+  return [...r].sort((a, b) => h(a.id) - h(b.id));
+}
+
+function shop(q) {
+  const f = filtersFrom(q);
+  const link = (k, v) => { const n = new URLSearchParams(q); n.delete("sort"); if (f.sort !== "featured") n.set("sort", f.sort); if (n.get(k) === v) n.delete(k); else n.set(k, v); return "#/shop?" + n; };
+  const match = (p, skip) => matches(p, f, skip);
+  const r = sortProducts(P.filter((p) => match(p)), f.sort);
+  const extra = [f.color && `in ${f.color}`, +f.max_price > 0 && `under ${money(+f.max_price)}`].filter(Boolean).join(" · ");
   const group = (name, k, vals) => `<div class="fgroup"><h2>${name}</h2>${vals.map(([v, n]) => `<a href="${link(k, v)}"${f[k] === v ? ' aria-current="true"' : ""}><span>${esc(v)}</span><span>${n}</span></a>`).join("")}</div>`;
   const count = (fn, skip) => { const c = {}; P.filter((p) => match(p, skip)).forEach((p) => { const v = fn(p); c[v] = (c[v] || 0) + 1; }); return c; };
   const dc = count(deptOf, "dept"), sc = count((p) => p.style, "style"), bc = count((p) => p.brand, "brand");
@@ -104,7 +116,7 @@ function shop(q) {
     ${group("Brand", "brand", Object.entries(bc).sort((a, b) => b[1] - a[1]).slice(0, 10))}
     <div class="fgroup"><a href="${link("sale", "1")}"${f.sale ? ' aria-current="true"' : ""}><span>On sale only</span></a></div>
    </details>
-   <div><div class="bar"><span>${r.length} ${r.length === 1 ? "piece" : "pieces"}</span>
+   <div><div class="bar"><span>${r.length} ${r.length === 1 ? "piece" : "pieces"}${extra ? ` · ${esc(extra)}` : ""}</span>
      <label>Sort <select id="sort"><option value="featured">Featured</option><option value="low">Price, low to high</option><option value="high">Price, high to low</option></select></label></div>
     ${r.length ? `<div class="grid">${r.slice(0, shown).map(card).join("")}</div>` : `<p class="empty">Nothing matches that. <a class="link" href="#/shop">See everything</a></p>`}
     ${r.length > shown ? `<div class="more"><button class="btn" id="more">Show more</button></div>` : ""}</div></div></div>`;
@@ -169,5 +181,6 @@ function route() {
 
 document.getElementById("search").addEventListener("submit", (e) => { e.preventDefault(); const v = document.getElementById("q").value.trim(); location.hash = v ? "#/shop?q=" + encodeURIComponent(v) : "#/shop"; });
 addEventListener("hashchange", route);
-Promise.all([fetch(DATA + "products.json").then((r) => r.json()), fetch(DATA + "outfits.json").then((r) => r.json())]).then(([a, b]) => { P = a; L = b; a.forEach((p) => (byId[p.id] = p)); route(); })
+// barn.js waits on CATALOG before window.Barn reports ready.
+const CATALOG = Promise.all([fetch(DATA + "products.json").then((r) => r.json()), fetch(DATA + "outfits.json").then((r) => r.json())]).then(([a, b]) => { P = a; L = b; a.forEach((p) => (byId[p.id] = p)); route(); })
   .catch(() => { main.innerHTML = `<div class="container"><p class="empty">The catalog didn’t load. Serve the project root over HTTP, then open /site/.</p></div>`; });
