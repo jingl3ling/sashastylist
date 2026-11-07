@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=sentient@300,400&display=swap">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="stylist.css">
+<link rel="stylesheet" href="bag.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -22,10 +23,13 @@
       <a href="#/shop?sale=1">Sale</a>
     </nav>
     <a class="mark" href="#/">Men’s Fashion Barn</a>
-    <form class="nav-r" role="search" id="search">
-      <label class="visually-hidden" for="q">Search the catalog</label>
-      <input id="q" type="search" placeholder="Search the barn" autocomplete="off">
-    </form>
+    <div class="nav-r">
+      <form class="nav-search" role="search" id="search">
+        <label class="visually-hidden" for="q">Search the catalog</label>
+        <input id="q" type="search" placeholder="Search the barn" autocomplete="off">
+      </form>
+      <button class="bag-btn" id="bag-open" type="button" aria-controls="bag-drawer" aria-expanded="false">Bag <span class="bag-count" id="bag-count">0</span></button>
+    </div>
   </div>
 </header>
 <main id="main" tabindex="-1"><noscript><div class="container"><p class="note-page">Men’s Fashion Barn needs JavaScript to show the catalog.</p></div></noscript></main>
@@ -57,7 +61,19 @@
     <button class="btn" type="submit">Send</button>
   </form>
 </aside>
+<aside class="bag" id="bag-drawer" role="dialog" aria-label="Your bag" hidden>
+  <div class="bag-head"><h2>Your bag</h2><button class="bag-close" id="bag-close" type="button">Close</button></div>
+  <ul class="bag-lines" id="bag-lines"></ul>
+  <p class="bag-empty" id="bag-empty">Your bag is empty.</p>
+  <div class="bag-foot">
+    <div class="bag-total"><span>Total</span><span id="bag-total">$0</span></div>
+    <button class="btn bag-checkout" id="bag-checkout" type="button">Check out</button>
+    <p class="bag-note" id="bag-note" aria-live="polite"></p>
+  </div>
+</aside>
+<div class="bag-toast" id="bag-toast" role="status" aria-live="polite"></div>
 <script src="app.js"></script>
 <script src="barn.js"></script>
+<script src="bag.js"></script>
 </body>
 </html>

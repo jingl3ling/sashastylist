@@ -2,7 +2,7 @@
 // Contract: "Store API" in the team plan. Keep results small; avatar tool results must stay under 4 KB.
 // Loaded after app.js, so it can use app.js globals: P, L, byId, DEPTS, title, slug, filtersFrom, matches, sortProducts, CATALOG.
 (() => {
-  const BAG_KEY = "barn.bag";
+  const BAG_KEY = "barn.bag", BAG_LIMIT = 10000;
   const loadBag = () => { try { return JSON.parse(localStorage.getItem(BAG_KEY)) || []; } catch { return []; } };
   const saveBag = (b) => { try { localStorage.setItem(BAG_KEY, JSON.stringify(b)); } catch {} };
   const brief = (p) => ({ id: p.id, title: title(p.title), brand: p.brand, price: p.simulated.price });
@@ -61,10 +61,25 @@
       if (!col) return { ok: false, error: `Colors available: ${p.colors.join(", ")}`, count: count() };
       const bag = loadBag(), line = bag.find((x) => x.id === p.id && x.size === sz && x.color === col);
       if (line && line.qty >= inv[sz]) return { ok: false, error: `Only ${inv[sz]} left in size ${sz}`, count: count() };
+      // The real spending guardrail (the avatar's prompt only tracks a rough total).
+      if (Barn.getBag().total + p.simulated.price > BAG_LIMIT) return { ok: false, error: "That would take the bag over the $10,000 limit", count: count() };
       line ? line.qty++ : bag.push({ id: p.id, size: sz, color: col, qty: 1 });
       saveBag(bag);
-      dispatchEvent(new CustomEvent("barn:bag"));
+      dispatchEvent(new CustomEvent("barn:bag", { detail: { action: "add", id: p.id, size: sz, color: col } }));
       return { ok: true, error: null, count: count() };
+    },
+
+    // For the bag drawer, not the avatar. qty 0 removes the line.
+    setQty(id, size, color, qty) {
+      const bag = loadBag(), line = bag.find((x) => x.id === id && x.size === size && x.color === color), p = byId[id];
+      if (!line || !p) return { ok: false, error: "That item isn't in your bag" };
+      const max = p.simulated.inventory[size] || 0;
+      if (qty > max) return { ok: false, error: `Only ${max} left in size ${size}` };
+      if (Barn.getBag().total + (qty - line.qty) * p.simulated.price > BAG_LIMIT) return { ok: false, error: "That would take the bag over the $10,000 limit" };
+      qty > 0 ? (line.qty = qty) : bag.splice(bag.indexOf(line), 1);
+      saveBag(bag);
+      dispatchEvent(new CustomEvent("barn:bag", { detail: { action: "set", id, size, color, qty } }));
+      return { ok: true, count: count() };
     },
 
     getBag() {

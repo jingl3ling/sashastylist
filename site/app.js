@@ -145,7 +145,13 @@ function product(id) {
   document.querySelectorAll(".thumbs button").forEach((b) => b.addEventListener("click", () => { big.src = img(p, +b.dataset.i); document.querySelectorAll(".thumbs button").forEach((x) => x.setAttribute("aria-pressed", x === b)); }));
   document.querySelectorAll(".chips").forEach((g) => g.addEventListener("click", (e) => { const b = e.target.closest(".chip"); if (!b || b.disabled) return;
     g.querySelectorAll(".chip").forEach((x) => x.setAttribute("aria-pressed", x === b)); document.getElementById(g.dataset.g === "c" ? "cv" : "sv").textContent = b.dataset.v; }));
-  document.getElementById("bag").addEventListener("click", () => { document.getElementById("note").textContent = "The bag isn’t open in this demo. Keep browsing."; });
+  document.getElementById("bag").addEventListener("click", () => {
+    const pick = (g) => document.querySelector(`.chips[data-g="${g}"] .chip[aria-pressed="true"]`)?.dataset.v;
+    const note = document.getElementById("note"), size = pick("s");
+    if (p.size_type !== "one" && !size) { note.textContent = "Choose a size first."; return; }
+    const r = Barn.addToBag(p.id, size, pick("c"));
+    note.textContent = r.ok ? `Added. ${r.count} ${r.count === 1 ? "item" : "items"} in your bag.` : r.error;
+  });
 }
 
 function looks() {
