@@ -3,7 +3,7 @@
 // No DOM or Daily imports, so it runs in node tests as-is.
 
 import type { Barn, BarnSearchFilters, RunRequest, StylistResult } from "./types";
-import type { StyleOutfitFn } from "./style-outfit";
+import { isDepartmentQuestion, StylistRunError, type StyleOutfitFn } from "./style-outfit";
 
 /** Tavus drops app messages over 4 KB silently, so results are trimmed below this. */
 export const MAX_APP_MESSAGE_BYTES = 4096;
@@ -304,12 +304,14 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         notes: { type: "string" },
         rework_slot: { type: "string" },
         rework_feedback: { type: "string" },
+        gender: { type: "string" },
       });
       if (!v.ok) return early(v.error);
       if (styleRunning) {
         return early("Looks are still being built. Don't call style_outfit again; tell the shopper it's still cooking.");
       }
       const a = v.args;
+      const gender = normalizeGender(a.gender as string | undefined);
       const asked = a.budget_usd as number;
       if (!(asked > 0)) return early("The budget has to be more than zero. Ask the shopper what they want to spend.");
       // $10,000 per conversation across all outfits and the bag. Items bought from a look count
@@ -328,6 +330,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         occasion: a.occasion as string,
         budget_usd: capped,
         ...(a.notes ? { notes: a.notes as string } : {}),
+        ...(gender ? { gender } : {}),
         ...(a.rework_slot && a.rework_feedback
           ? { rework: { slot: a.rework_slot as string, feedback: a.rework_feedback as string } }
           : {}),
@@ -344,6 +347,11 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
           res = await withTimeout(opts.styleOutfit(req), styleTimeout);
         } catch (e) {
           opts.onLog?.({ dir: "info", text: `style_outfit backend failed: ${(e as Error).message}` });
+          if (e instanceof StylistRunError && isDepartmentQuestion(e.backendMessage)) {
+            return err(
+              `The stylist needs the department before it can build looks. Ask the shopper this aloud, once: "${e.backendMessage}" Then call style_outfit again with the same occasion and budget and gender set to men or women.`,
+            );
+          }
           return err("The stylist couldn't finish those looks. Say so plainly and offer to try again.");
         } finally {
           styleRunning = false;
@@ -391,6 +399,14 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       };
     },
   };
+}
+
+/** "men" | "women" from loose words; anything else (or nothing) means unknown, so it isn't sent. */
+export function normalizeGender(v: string | undefined): "men" | "women" | undefined {
+  const w = (v ?? "").toLowerCase().replace(/[^a-z]/g, "");
+  if (/^(women|woman|womens|female|ladies|lady|womenswear)$/.test(w)) return "women";
+  if (/^(men|man|mens|male|gents|menswear)$/.test(w)) return "men";
+  return undefined;
 }
 
 // ---- stylist result compaction ----

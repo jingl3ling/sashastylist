@@ -65,6 +65,8 @@ export interface RunRequest {
   occasion: string;
   budget_usd: number;
   notes?: string;
+  /** Department to style from. Omit when unknown: the run then ends with an error asking for it. */
+  gender?: "men" | "women";
   rework?: { slot: string; feedback: string };
 }
 

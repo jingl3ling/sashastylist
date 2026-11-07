@@ -58,6 +58,10 @@ export function shopperContext(shopper = readJson(join(here, '..', 'pal', 'demo-
   if (closet?.length) {
     lines.push(`Closet items this shopper already owns: ${closet.join(', ')}.`)
   }
+  // Department, if the shopper file has it (Jing: "gender": "men" | "women"). Never guessed from camera.
+  if (shopper?.gender === 'men' || shopper?.gender === 'women') {
+    lines.push(`Department for this shopper: ${shopper.gender === 'women' ? "women's" : "men's"}. Pass gender "${shopper.gender}" to style_outfit.`)
+  }
   return lines.join('\n')
 }
 

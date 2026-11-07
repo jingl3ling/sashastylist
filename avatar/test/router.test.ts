@@ -12,7 +12,7 @@ import {
   type ToolCallMessage,
   type ToolResultMessage,
 } from "../router";
-import { mockStylist, parseBudget, readSse, stylistClient } from "../style-outfit";
+import { mockStylist, parseBudget, readSse, StylistRunError, stylistClient } from "../style-outfit";
 import type { Barn, RunRequest, StylistResult } from "../types";
 
 import { CATALOG, fakeBarn } from "./fake-barn";
@@ -208,6 +208,44 @@ describe("style_outfit", () => {
     assert.ok(byteLength(r) <= 3500);
   });
 
+  it("sends gender only when it's men or women, normalising loose words", async () => {
+    const seen: RunRequest[] = [];
+    const { router } = setup({ styleOutfit: async (req) => (seen.push(req), mockStylist([], 0)(req)) });
+    for (const g of ["women", "Men's", "female", "unknown", ""]) {
+      await router.handle(call("style_outfit", { occasion: `o-${g}`, budget_usd: 100, gender: g }));
+    }
+    assert.deepEqual(seen.map((r) => r.gender), ["women", "men", "women", undefined, undefined]);
+    assert.ok(!("gender" in seen[3]), "unknown department is left out of the request");
+  });
+
+  it("turns the backend's department question into something Sasha asks aloud", async () => {
+    const pushed: RespondMessage[] = [];
+    const q = "Should I style from the men's or women's department?";
+    const { router } = setup({
+      styleOutfitMode: "background",
+      styleOutfit: async () => {
+        throw new StylistRunError(q);
+      },
+    });
+    const r = await router.handle(call("style_outfit", { occasion: "w", budget_usd: 800 }), (m) => pushed.push(m));
+    ok(r);
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal(pushed.length, 1);
+    assert.ok(pushed[0].properties.text.includes(q), pushed[0].properties.text);
+    assert.match(pushed[0].properties.text, /call style_outfit again .* gender/);
+  });
+
+  it("keeps the generic message for other backend errors", async () => {
+    const { router } = setup({
+      styleOutfit: async () => {
+        throw new StylistRunError("No valid looks within budget.");
+      },
+    });
+    const r = await router.handle(call("style_outfit", { occasion: "w", budget_usd: 800 }));
+    ok(r, "error");
+    assert.match(String(r.properties.output), /couldn't finish/);
+  });
+
   it("background mode also speaks early errors, since style_outfit is add_to_context", async () => {
     const pushed: RespondMessage[] = [];
     const { router } = setup({ styleOutfitMode: "background" });
@@ -324,7 +362,10 @@ describe("stylist client (Jing's backend)", () => {
 
   it("rejects on an error event, a bad status, or a stream without a result", async () => {
     const opts = { shopper_id: "s", conversation_id: "c", occasion: "o", budget_usd: 1 };
-    await assert.rejects(stylistClient({ baseUrl: "http://x", fetchImpl: fakeFetch([{ type: "error", message: "nope" }]).f })(opts), /nope/);
+    await assert.rejects(
+      stylistClient({ baseUrl: "http://x", fetchImpl: fakeFetch([{ type: "error", message: "nope" }]).f })(opts),
+      (e: unknown) => e instanceof StylistRunError && e.backendMessage === "nope",
+    );
     await assert.rejects(stylistClient({ baseUrl: "http://x", fetchImpl: fakeFetch([], 400).f })(opts), /400/);
     await assert.rejects(stylistClient({ baseUrl: "http://x", fetchImpl: fakeFetch([]).f })(opts), /without a result/);
   });
@@ -379,6 +420,8 @@ describe("tools.json", () => {
       style_outfit: ["generate_filler", "add_to_context", ["occasion", "budget_usd"]],
     };
     assert.deepEqual(tools.map((t: any) => t.name).sort(), Object.keys(want).sort());
+    const so = tools.find((t: any) => t.name === "style_outfit");
+    assert.deepEqual(so.parameters.properties.gender.enum, ["men", "women"]);
     const prompt = readFileSync(new URL("../../pal/system-prompt.md", import.meta.url), "utf8");
     for (const t of tools) {
       const [onCall, onResolve, required] = want[t.name];

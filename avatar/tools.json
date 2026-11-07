@@ -101,7 +101,7 @@
   },
   {
     "name": "style_outfit",
-    "description": "Hand the brief to the styling agent, which builds three complete looks from the catalog and the shopper's closet and puts them on the outfit board. You need the event and the budget first. It is SLOW (about a minute) and the shopper can watch each step on screen. Usually this returns at once with started: true. Then keep the shopper company, never predict the result, and never call it again; the looks arrive in a later message starting with STYLIST RESULT. When the looks arrive (or if this returns them directly), say spoken_summary in your own voice and ask which look the shopper likes. To change one piece of the looks, call it again with the same occasion and budget plus rework_slot and rework_feedback.",
+    "description": "Hand the brief to the styling agent, which builds three complete looks from the catalog and the shopper's closet and puts them on the outfit board. You need the event and the budget first, and the department (men or women) if the shopper has said it. It is SLOW (about a minute) and the shopper can watch each step on screen. Usually this returns at once with started: true. Then keep the shopper company, never predict the result, and never call it again; the looks arrive in a later message starting with STYLIST RESULT. When the looks arrive (or if this returns them directly), say spoken_summary in your own voice and ask which look the shopper likes. To change one piece of the looks, call it again with the same occasion and budget plus rework_slot and rework_feedback.",
     "parameters": {
       "type": "object",
       "properties": {
@@ -124,6 +124,14 @@
         "rework_feedback": {
           "type": "string",
           "description": "Only when changing one piece: what's wrong with it, e.g. 'too formal'."
+        },
+        "gender": {
+          "type": "string",
+          "enum": [
+            "men",
+            "women"
+          ],
+          "description": "Which department to style from: 'men' or 'women', as the shopper said it. Never decide it from the camera. If you don't know, leave it out: the result will then ask you to check with the shopper, and you call again with it."
         }
       },
       "required": [
