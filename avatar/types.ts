@@ -51,6 +51,8 @@ export interface Barn {
   showLooks(result: StylistResult): unknown;
   addFeedStep(step: { id: string; label?: string; status?: StepStatus }): unknown;
   resetFeed(): unknown;
+  /** Stops any spinning feed rows (site/barn.js). */
+  stopFeed?(to?: string): unknown;
   /** Price lookup without navigating (barn.js, Arjun #9). */
   getProduct?(id: string): ({ ok: true } & BarnBrief) | { ok: false; error: string; price?: undefined } | null;
 }

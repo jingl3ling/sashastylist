@@ -80,6 +80,8 @@ export interface RouterOptions {
    * Fallback in case Tavus drops slow tool results (TEAM_PLAN risk table).
    */
   styleOutfitMode?: "await" | "background";
+  /** False for a conversation that has ended; its late looks and messages are dropped. */
+  isCurrent?: (conversationId: string) => boolean;
   trimThresholdBytes?: number;
   onLog?: (entry: RouterLogEntry) => void;
   /** Plain-text log; defaults to console.log. */
@@ -180,7 +182,8 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
   const shopperId = opts.shopperId ?? "demo-shopper";
   const log = opts.logger ?? ((line: string) => console.log(line));
   const threshold = opts.trimThresholdBytes ?? TRIM_THRESHOLD_BYTES;
-  let styleRunning = false;
+  /** Calls with a styling run in flight (per call, so an abandoned call's run can't block the next one). */
+  const running = new Set<string>();
   /** Department last used in this conversation, so a forgotten gender arg doesn't flip departments mid-call. */
   const departments = new Map<string, "men" | "women">();
   /** Per call: whether a look has been built yet, and the last looks if they came from a preset. */
@@ -223,10 +226,10 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       if (g) filters.gender = g;
       if (a.on_sale) filters.sale = true;
       let results = (await barn.search({ ...filters })) ?? [];
-      // Nothing matched every filter (e.g. Suits + Casual): drop the softest filters one at a time,
-      // keeping the query, price, size and department gender, so the page never sits empty.
+      // Nothing matched every filter (e.g. Suits + Casual): drop the softest filters one at a time
+      // (style, color, department, then size), keeping the query, price and gender, so the page never sits empty.
       const loosened: string[] = [];
-      for (const k of ["style", "color", "dept"] as const) {
+      for (const k of ["style", "color", "dept", "size"] as const) {
         if (results.length > 0) break;
         if (filters[k] === undefined) continue;
         loosened.push(`${k === "dept" ? "department" : k} ${filters[k]}`);
@@ -316,10 +319,10 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       // style_outfit's on_resolve is add_to_context (tools.json), so Sasha never speaks a direct
       // result. In background mode, anything she must react to now (a missing budget, a run
       // already going, the limit used up) is also pushed to her as a spoken message.
-      const early = (text: string): HandlerResult => {
+      const early = (text: string, prefix = "STYLIST RESULT"): HandlerResult => {
         if (styleMode === "background" && ctx.send) {
           try {
-            ctx.send(fitRespond(ctx.conversationId, `STYLIST RESULT, not said by the shopper. ${text}`, threshold));
+            ctx.send(fitRespond(ctx.conversationId, `${prefix}, not said by the shopper. ${text}`, threshold));
           } catch (e) {
             log(`[tool] style_outfit early send failed: ${(e as Error).message}`);
           }
@@ -335,8 +338,10 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         gender: { type: "string" },
       });
       if (!v.ok) return early(v.error);
-      if (styleRunning) {
-        return early("Looks are still being built. Don't call style_outfit again; tell the shopper it's still cooking.");
+      const callId = ctx.conversationId || "no-conversation";
+      if (running.has(callId)) {
+        // STYLIST UPDATE, not RESULT: the prompt treats a STYLIST RESULT as "your looks are in".
+        return early("Looks are still being built. Don't call style_outfit again; tell the shopper it's still cooking.", "STYLIST UPDATE");
       }
       const a = v.args;
       const gender = department(ctx, a.gender);
@@ -344,15 +349,16 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       if (!(asked > 0)) return early("The budget has to be more than zero. Ask the shopper what they want to spend.");
       // $10,000 per conversation across all outfits and the bag. Items bought from a look count
       // toward both, so committed spend is the larger of the bag and the other outfits' budgets.
-      const key = occasionKey(a.occasion as string);
-      const otherOutfits = [...outfitBudgets].filter(([k]) => k !== key).reduce((sum, [, b]) => sum + b, 0);
+      const key = `${callId}|${occasionKey(a.occasion as string)}`;
+      const otherOutfits = [...outfitBudgets]
+        .filter(([k]) => k !== key && k.startsWith(`${callId}|`))
+        .reduce((sum, [, b]) => sum + b, 0);
       const bagTotal = (await barn.getBag())?.total ?? 0;
       const room = usd(limit - Math.max(bagTotal, otherOutfits));
       if (room <= 0) {
         return early(`The ${limit} dollar limit for this conversation is used up by the earlier outfits and the bag. Tell the shopper no more looks this time.`);
       }
       const capped = Math.min(asked, room);
-      const callId = ctx.conversationId || "no-conversation";
       const before = styled.get(callId);
       const wantsRework = Boolean(a.rework_slot && a.rework_feedback);
       // Presets answer only the first look of a call; every later request runs the live agent so the
@@ -381,8 +387,9 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
           ? { budget_note: `Budget capped at ${capped} dollars: the limit is ${limit} dollars per conversation across all outfits and the bag.` }
           : {};
 
+      const current = () => opts.isCurrent?.(callId) ?? true;
       const run = async (): Promise<HandlerResult> => {
-        styleRunning = true;
+        running.add(callId);
         let res: StylistResult;
         try {
           res = await withTimeout(opts.styleOutfit(req), styleTimeout);
@@ -395,8 +402,10 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
           }
           return err("The stylist couldn't finish those looks. Say so plainly and offer to try again.");
         } finally {
-          styleRunning = false;
+          running.delete(callId);
         }
+        // The call ended while this ran: don't put its looks on the board or message a later call.
+        if (!current()) return err("That call ended before the looks were ready.");
         if (!res || !Array.isArray(res.looks) || res.looks.length === 0) {
           return err("The stylist came back with no looks. Say so plainly and offer to try again.");
         }
@@ -419,6 +428,10 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       // looks as a conversation.respond message when the run finishes.
       const send = ctx.send;
       void run().then((r) => {
+        if (!current()) {
+          opts.onLog?.({ dir: "info", text: "style_outfit result dropped: its call has ended" });
+          return;
+        }
         const text =
           r.status === "success"
             ? fitStylistText(r.output as ReturnType<typeof compactStylist>, ctx.conversationId, threshold)

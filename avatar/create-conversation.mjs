@@ -29,8 +29,6 @@ function checkLimits() {
   const now = Date.now()
   if (callsMade >= MAX_CALLS) return `call limit reached (${MAX_CALLS} per server run); restart the server or raise AVATAR_MAX_CALLS`
   if (now - lastCallAt < COOLDOWN_MS) return `wait ${Math.ceil((COOLDOWN_MS - (now - lastCallAt)) / 1000)}s before starting another call`
-  lastCallAt = now
-  callsMade += 1
   return null
 }
 
@@ -68,6 +66,10 @@ export async function createConversation({ conversationalContext, customGreeting
   if (!pal) throw new Error('TAVUS_PAL_ID is not set and pal/pal-id.txt is missing')
   const limited = checkLimits()
   if (limited) throw Object.assign(new Error(limited), { status: 429 })
+  // Hold the cooldown slot during the attempt (blocks double clicks); a failed attempt gives it back
+  // and doesn't count toward MAX_CALLS, so one Tavus error can't lock out a retake.
+  const prevCallAt = lastCallAt
+  lastCallAt = Date.now()
 
   const body = {
     pal_id: pal,
@@ -82,13 +84,23 @@ export async function createConversation({ conversationalContext, customGreeting
   if (process.env.TAVUS_FACE_ID) body.face_id = process.env.TAVUS_FACE_ID
   if (customGreeting) body.custom_greeting = customGreeting
 
-  const res = await fetch(`${TAVUS_API}/conversations`, {
-    method: 'POST',
-    headers: { 'x-api-key': apiKey, 'content-type': 'application/json' },
-    body: JSON.stringify(body),
-  })
-  const text = await res.text()
-  if (!res.ok) throw new Error(`Tavus create conversation ${res.status}: ${text.slice(0, 300)}`)
+  let res, text
+  try {
+    res = await fetch(`${TAVUS_API}/conversations`, {
+      method: 'POST',
+      headers: { 'x-api-key': apiKey, 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    text = await res.text()
+  } catch (e) {
+    lastCallAt = prevCallAt // network failure: give the cooldown slot back
+    throw e
+  }
+  if (!res.ok) {
+    lastCallAt = prevCallAt
+    throw new Error(`Tavus create conversation ${res.status}: ${text.slice(0, 300)}`)
+  }
+  callsMade += 1
   const data = JSON.parse(text)
   return { conversation_id: data.conversation_id, conversation_url: data.conversation_url }
 }

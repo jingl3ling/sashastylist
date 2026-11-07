@@ -56,7 +56,8 @@ export function applyUtterance(lines: CaptionLine[], u: Utterance, max = 200): C
   if (last >= 0) {
     const l = next[last];
     const a = norm(l.text), b = norm(u.text);
-    const sameLine = a === b || a.startsWith(b) || b.startsWith(a);
+    // Text with no letters or digits ("…", emoji, other scripts) normalises to "" and must not match everything.
+    const sameLine = a !== "" && b !== "" && (a === b || a.startsWith(b) || b.startsWith(a));
     const sameKey = l.key === u.key;
     // Only the speaker's newest turn can be updated: their line must be the last, or followed only by the other speaker's interjection.
     const recent = last >= next.length - 2;

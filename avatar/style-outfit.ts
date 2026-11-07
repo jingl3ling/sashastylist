@@ -6,7 +6,7 @@
 
 import type { RunRequest, StepStatus, StylistEvent, StylistResult } from "./types";
 
-export type StyleOutfitFn = (req: RunRequest) => Promise<StylistResult>;
+export type StyleOutfitFn = (req: RunRequest, opts?: { signal?: AbortSignal }) => Promise<StylistResult>;
 
 /** An `error` event from the stylist backend. `message` is the backend's own text. */
 export class StylistRunError extends Error {
@@ -39,8 +39,10 @@ export function stylistClient(opts: StylistClientOptions): StyleOutfitFn {
   const f = opts.fetchImpl ?? ((...a: Parameters<typeof fetch>) => fetch(...a));
   const timeoutMs = opts.timeoutMs ?? DEFAULT_STYLE_OUTFIT_TIMEOUT_MS;
 
-  return async (req) => {
-    const signal = AbortSignal.timeout(timeoutMs);
+  return async (req, runOpts) => {
+    // Times out on its own, and also stops when the caller aborts (the call ended).
+    const timeout = AbortSignal.timeout(timeoutMs);
+    const signal = runOpts?.signal && typeof AbortSignal.any === "function" ? AbortSignal.any([timeout, runOpts.signal]) : (runOpts?.signal ?? timeout);
     const start = await f(`${base}/api/stylist/run`, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -58,7 +60,7 @@ export function stylistClient(opts: StylistClientOptions): StyleOutfitFn {
     });
     if (!res.ok || !res.body) throw new Error(`stylist events ${res.status}`);
 
-    for await (const ev of readSse(res.body)) {
+    for await (const ev of readSse(res.body, signal)) {
       if (ev.type === "step") opts.onStep?.({ id: ev.id, label: ev.label, status: ev.status });
       else if (ev.type === "error") throw new StylistRunError(ev.message);
       else if (ev.type === "result") {
@@ -66,13 +68,18 @@ export function stylistClient(opts: StylistClientOptions): StyleOutfitFn {
         return { looks, spoken_summary, lookbook_artifact, ...(warnings?.length ? { warnings } : {}) };
       }
     }
+    if (signal.aborted) throw new Error("stylist run stopped: the call ended or timed out");
     throw new Error("stylist stream ended without a result");
   };
 }
 
 /** Minimal SSE reader: yields the JSON of each `data:` event; ignores comments (pings). */
-export async function* readSse(body: ReadableStream<Uint8Array>): AsyncGenerator<StylistEvent> {
+export async function* readSse(body: ReadableStream<Uint8Array>, signal?: AbortSignal): AsyncGenerator<StylistEvent> {
   const reader = body.getReader();
+  // Stop reading as soon as the caller aborts, even if the stream itself never ends.
+  const onAbort = () => void reader.cancel().catch(() => {});
+  if (signal?.aborted) onAbort();
+  signal?.addEventListener("abort", onAbort, { once: true });
   const decoder = new TextDecoder();
   let buf = "";
   try {
@@ -99,6 +106,7 @@ export async function* readSse(body: ReadableStream<Uint8Array>): AsyncGenerator
       if (done) return;
     }
   } finally {
+    signal?.removeEventListener("abort", onAbort);
     // Close the connection as soon as we stop reading (result, error, or the caller bailing).
     // fetch never reconnects, so the server can't replay the run (Jing's contract note).
     await reader.cancel().catch(() => {});
@@ -142,4 +150,11 @@ export function parseBudget(text: string): number | undefined {
   const n = Number((m[1] ?? m[3]).replace(/,/g, ""));
   const k = /^(k|grand)$/i.test(m[2] ?? m[4] ?? "");
   return Number.isFinite(n) ? n * (k ? 1000 : 1) : undefined;
+}
+
+/** Department named in a typed brief ("Men's. Wedding in Italy…"); undefined if it isn't said. */
+export function typedGender(text: string): "men" | "women" | undefined {
+  if (/\b(wom[ae]n'?s?|ladies|female)\b/i.test(text)) return "women";
+  if (/\b(men'?s?|mens|male|gents)\b/i.test(text)) return "men";
+  return undefined;
 }

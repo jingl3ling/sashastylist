@@ -14,7 +14,7 @@ import Daily, { type DailyCall, type DailyEventObjectAppMessage, type DailyParti
 import { applyUtterance, parseUtterance, transcriptText, type CaptionLine } from "./captions";
 import { mountDebugPanel } from "./debug-panel";
 import { createRouter, type RouterLogEntry, type ToolCallMessage } from "./router";
-import { parseBudget, stylistClient } from "./style-outfit";
+import { parseBudget, stylistClient, typedGender } from "./style-outfit";
 import type { Barn } from "./types";
 import { createSpeechTracker, createWaitTalk } from "./wait-talk";
 
@@ -48,7 +48,7 @@ const barn = (): Barn | undefined => window.Barn;
 const log: RouterLogEntry[] = [];
 
 // Who's talking, so wait talk never cuts anyone off.
-const speech = createSpeechTracker();
+let speech = createSpeechTracker();
 
 const waitTalk = createWaitTalk({
   say: (text) => {
@@ -56,6 +56,10 @@ const waitTalk = createWaitTalk({
   },
   quietMs: (now) => speech.quietMs(now),
 });
+
+/** Styling runs in flight (aborted when their call ends) and calls that have ended (their late looks are dropped). */
+const runs = new Set<AbortController>();
+const endedCalls = new Set<string>();
 
 const runStylist = stylistClient({
   baseUrl: backend,
@@ -74,13 +78,20 @@ const router = createRouter({
   styleOutfit: async (req) => {
     waitTalk.start(Date.now());
     const timer = setInterval(() => waitTalk.tick(Date.now()), 1_000);
+    const ctrl = new AbortController();
+    runs.add(ctrl);
     try {
-      return await runStylist(req);
+      return await runStylist(req, { signal: ctrl.signal });
+    } catch (e) {
+      barn()?.stopFeed?.(); // a failed or aborted run: don't leave feed rows spinning
+      throw e;
     } finally {
+      runs.delete(ctrl);
       clearInterval(timer);
       waitTalk.stop();
     }
   },
+  isCurrent: (id) => !endedCalls.has(id),
   onLog: (e) => {
     log.push(e);
     if (log.length > 200) log.shift();
@@ -286,6 +297,7 @@ async function start() {
   if (state === "starting" || state === "live") return;
   state = "starting";
   captions = [];
+  speech = createSpeechTracker(); // stale speaking flags from a previous call would silence wait talk
   render();
   try {
     await barn()?.ready;
@@ -313,7 +325,24 @@ async function start() {
   }
 }
 
+/** Ends the Tavus conversation (also after a failed join or a call error), stops its runs and marks it ended. */
+function retire(id: string | undefined) {
+  if (!id) return;
+  endedCalls.add(id);
+  for (const r of runs) r.abort();
+  runs.clear();
+  waitTalk.stop();
+  fetch(`${backend}/api/conversation/end`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ conversation_id: id }),
+    keepalive: true,
+  }).catch(() => {});
+}
+
 async function cleanup(message: string, isError = false) {
+  retire(conversationId);
+  conversationId = undefined;
   const c = call;
   call = undefined;
   if (c) {
@@ -332,26 +361,10 @@ async function end() {
   if (state !== "live") return;
   state = "ending";
   render();
-  const id = conversationId;
-  conversationId = undefined;
-  if (id) {
-    fetch(`${backend}/api/conversation/end`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ conversation_id: id }),
-    }).catch(() => {});
-  }
-  await cleanup("Call ended.");
+  await cleanup("Call ended."); // cleanup retires the conversation (ends it on Tavus, stops its runs)
 }
 
-addEventListener("pagehide", () => {
-  if (conversationId) {
-    navigator.sendBeacon?.(
-      `${backend}/api/conversation/end`,
-      new Blob([JSON.stringify({ conversation_id: conversationId })], { type: "application/json" }),
-    );
-  }
-});
+addEventListener("pagehide", () => retire(conversationId));
 
 // ---- typed-brief fallback ----
 
@@ -377,7 +390,7 @@ addEventListener("barn:brief", async (e) => {
     conversation_id: conversationId ?? `typed-${Date.now()}`,
     properties: {
       name: "style_outfit",
-      arguments: { occasion: text, budget_usd: budget, notes: "Typed brief, no video call." },
+      arguments: { occasion: text, budget_usd: budget, notes: "Typed brief, no video call.", ...(typedGender(text) ? { gender: typedGender(text) } : {}) },
       tool_call_id: `typed_${++briefs}`,
     },
   };
