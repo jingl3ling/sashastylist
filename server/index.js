@@ -26,11 +26,51 @@ function publish(run, event) {
   }
 }
 
+// If the live run gives no result within this time, serve the cached demo looks instead.
+const FALLBACK_AFTER_MS = Number(process.env.STYLIST_FALLBACK_AFTER_MS ?? 100_000)
+
+// Pulls events from `source` until a result, or throws on error / deadline.
+async function pump(run, source, deadlineMs) {
+  const deadline = Date.now() + deadlineMs
+  const it = source[Symbol.asyncIterator]()
+  try {
+    for (;;) {
+      const left = deadline - Date.now()
+      if (left <= 0) throw new Error('Live run timed out')
+      let timer
+      const pending = it.next()
+      pending.catch(() => {}) // a late rejection after the deadline must not crash the server
+      const next = await Promise.race([
+        pending,
+        new Promise((_, rej) => (timer = setTimeout(() => rej(new Error('Live run timed out')), left))),
+      ]).finally(() => clearTimeout(timer))
+      if (next.done) return
+      publish(run, next.value)
+      if (next.value.type === 'result') return
+    }
+  } finally {
+    it.return?.().catch?.(() => {})
+  }
+}
+
 async function execute(run, req) {
   try {
-    let source = stubRun(req)
-    if (MODE === 'live') source = (await import('./stylist.js')).liveRun(req)
-    for await (const event of source) publish(run, event)
+    const { fallbackRun, pickEntry } = await import('./fallback.js')
+    if (MODE === 'cache') {
+      await pump(run, fallbackRun(req, { force: true }), 60_000)
+    } else if (MODE === 'live') {
+      try {
+        await pump(run, (await import('./stylist.js')).liveRun(req), FALLBACK_AFTER_MS)
+      } catch (err) {
+        // Live run failed or was too slow. Serve cached looks only for a request they fit.
+        if (run.done || !pickEntry(req)) throw err
+        console.error('live run failed, serving cache:', err.message)
+        publish(run, { type: 'step', id: 'fallback', label: 'Pulling up saved looks', status: 'start' })
+        await pump(run, fallbackRun(req), 60_000)
+      }
+    } else {
+      await pump(run, stubRun(req), 60_000)
+    }
     if (!run.done) publish(run, { type: 'error', message: 'Run ended without a result' })
   } catch (err) {
     console.error('run failed:', err)

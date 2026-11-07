@@ -11,6 +11,7 @@ const client = createZooworkClient()
 const message = [
   `Save what you know about shopper "${shopper.shopper_id}" (${shopper.name}) to memory so future sessions can recall it.`,
   'Use memory_create with scope "user_agent", one short fact per call: one for sizes, one for style, fit and colors,',
+  'one for the shopper\'s department (men\'s or women\'s, from the "gender" field, if present; label it "department"),',
   'one for things to avoid, and one per closet item (include the notes, for example how formal it is or its season).',
   'Do not search the catalog or browse the web. When done, reply with the number of facts saved.',
   '',
