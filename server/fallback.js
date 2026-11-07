@@ -12,7 +12,12 @@ export const hasFallback = () => Boolean(cache)
 // Returns the cached entry for this request, or null if there is none.
 export function pickEntry(req, { force = false } = {}) {
   if (!cache) return null
-  if (!force && !cache.match.some((w) => req.occasion.toLowerCase().includes(w))) return null
+  if (!force) {
+    if (!cache.match.some((w) => req.occasion.toLowerCase().includes(w))) return null
+    // The cached looks are the demo shopper's, in the department they were captured for.
+    if (cache.brief?.shopper_id && req.shopper_id !== cache.brief.shopper_id) return null
+    if (req.gender && cache.brief?.gender && req.gender !== cache.brief.gender) return null
+  }
   return req.rework ? cache.rework?.[req.rework.slot.toLowerCase()] ?? null : cache.base
 }
 

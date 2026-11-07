@@ -52,6 +52,7 @@ function buildPrompt(req) {
   return [
     `Occasion: ${req.occasion}.`,
     `Budget: $${req.budget_usd}.`,
+    req.gender ? `Department: ${req.gender === 'women' ? "women's" : "men's"}.` : '',
     req.notes ? `Notes: ${req.notes}.` : '',
     `Shopper id: ${req.shopper_id}.`,
     'Run the full styling job and finish with the result JSON.',
@@ -71,19 +72,33 @@ export function extractJson(text) {
 }
 
 // Drops unknown product_ids and recomputes totals from catalog prices.
-export function validate(result, budget) {
+export function validate(result, budget, gender) {
   const warnings = []
+  const crossed = new Set() // looks that mix departments are dropped whole, not trimmed
   const looks = result.looks
     .map((look) => {
+      let mixed = false
       const items = look.items.filter((item) => {
         if (!item.product_id || !catalog) return true
-        const ok = catalog.has(item.product_id)
-        if (!ok) warnings.push(`Dropped unknown product ${item.product_id}`)
-        return ok
+        const product = catalog.get(item.product_id)
+        if (!product) {
+          warnings.push(`Dropped unknown product ${item.product_id}`)
+          return false
+        }
+        // A catalog without a gender field is men's only, so nothing to check.
+        if (gender && product.gender && product.gender !== gender) {
+          warnings.push(`Dropped "${look.outfit_name}": ${item.product_id} is from the ${product.gender}'s department`)
+          mixed = true
+          return false
+        }
+        return true
       })
       const total = items.reduce((sum, i) => sum + (i.product_id && catalog ? catalog.get(i.product_id).simulated.price : 0), 0)
-      return { ...look, items, total_usd: catalog ? Math.round(total * 100) / 100 : look.total_usd }
+      const out = { ...look, items, total_usd: catalog ? Math.round(total * 100) / 100 : look.total_usd }
+      if (mixed) crossed.add(out)
+      return out
     })
+    .filter((look) => !crossed.has(look))
     .filter((look) => look.items.length > 0)
     .filter((look) => {
       // The agent is told to stay in budget but is not trusted on arithmetic.
@@ -148,12 +163,14 @@ export async function* liveRun(req) {
 
   if (outcome !== 'succeeded') throw new Error(`Styling run ${outcome ?? 'did not finish'}`)
   const json = extractJson(finalText)
+  // The agent could not tell which department to style from, so it asks instead of guessing.
+  if (json?.needs_gender) throw new Error(json.question || "Should I style from the men's or women's department?")
   const parsed = StylistResult.safeParse(json)
   if (!parsed.success) {
     console.error('Unreadable stylist result. Final text:\n', finalText.slice(0, 1500), '\nIssues:', parsed.error?.issues?.slice(0, 3))
     throw new Error('Stylist returned an unreadable result')
   }
-  const result = validate(parsed.data, req.budget_usd)
+  const result = validate(parsed.data, req.budget_usd, req.gender)
   if (result.looks.length === 0) throw new Error(`No valid looks within budget. ${result.warnings.join(' ')}`.trim())
   yield { type: 'result', ...result, elapsed_ms: Date.now() - started }
 }

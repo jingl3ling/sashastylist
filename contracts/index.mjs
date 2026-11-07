@@ -8,6 +8,9 @@ export const RunRequest = z.object({
   occasion: z.string().min(1),
   budget_usd: z.number().positive(),
   notes: z.string().optional(),
+  // Department to style from. Optional: if omitted the agent uses the department stored in the
+  // shopper's memory, and the run ends with an error asking for it if neither is known.
+  gender: z.enum(['men', 'women']).optional(),
   // Optional, set only to change one piece in the same Session (F8), e.g.
   // { slot: "Shoes", feedback: "too formal" }.
   rework: z.object({ slot: z.string().min(1), feedback: z.string().min(1) }).optional(),
