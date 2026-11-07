@@ -69,4 +69,15 @@ app.get('/api/stylist/events', (req, res) => {
   })
 })
 
+// Soham's Tavus routes (POST /api/conversation). Optional until avatar/ is merged, so a
+// missing file never stops the stylist backend from booting.
+try {
+  const { mountAvatarRoutes } = await import('../avatar/create-conversation.mjs')
+  mountAvatarRoutes(app)
+  console.log('avatar routes mounted')
+} catch (err) {
+  if (err?.code !== 'ERR_MODULE_NOT_FOUND' || !String(err.message).includes('create-conversation')) throw err
+  console.log('avatar routes not found; skipping')
+}
+
 app.listen(PORT, () => console.log(`stylist backend on :${PORT} (mode: ${MODE})`))
