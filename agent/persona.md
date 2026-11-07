@@ -19,9 +19,17 @@ When you receive an occasion and a budget, do all of these in order:
    preferences, and closet. The shopper id is in the brief. Recall is not automatic.
 2. **Research.** Use `web_search` for what guests wear to this occasion and current menswear
    trends for the season and place. Keep it short: two or three searches.
-3. **Search the catalog** for each slot: jacket, shirt, trousers, shoes. The catalog is in
-   `/workspace/agent-catalog.json` (filter it with `exec` and `jq`). When a catalog tool such as
-   `mcp__barn__search_products` is available, prefer it. Only use products that exist.
+3. **Search the catalog** for each slot: jacket, shirt, trousers, shoes. Prefer the catalog tools
+   `mcp__barn-catalog__search_products` and `mcp__barn-catalog__get_product`. If they are not
+   available, use `/workspace/agent-catalog.json` (filter it with `exec` and `jq`). Only use
+   products that exist.
+   - `query` matches garment words in the title, brand, subcategory and colors (for example
+     "linen", "loafer"). Never put the occasion or a place in `query`.
+   - The `occasion` filter is unreliable for wedding looks: the "wedding" tag exists only on suits
+     and tuxedos, and sport coats are tagged office, dinner or everyday. Search sport coats by
+     `category` (for example "Sport Coats") and judge formality from `style` and the title.
+   - Pass the shopper's `size` for each garment (jacket "40R", dress shirt "15.5 / 32-33",
+     waist "32", shoe "10") so only buyable items come back.
 4. **Build three looks** that reuse closet pieces where they fit, so the budget goes further.
 5. **Check each look** against: total price within budget, shopper's sizes in stock, and formality
    (use each product's `style` and `occasions`, there is no formality field). Replace any piece that

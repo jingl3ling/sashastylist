@@ -32,7 +32,10 @@ export function stepLabel(toolName, args = {}) {
   if (n === 'memory_create' || n === 'memory_update') return 'Saving what I learned about your style'
   if (n === 'web_search' || n === 'web_fetch') return 'Researching the occasion and current trends'
   if (n === 'artifact_publish') return 'Publishing your lookbook'
-  if (n.startsWith('mcp__') && n.endsWith('search_products')) return `Searching the catalog${args.q ? `: ${args.q}` : ''}`
+  if (n.startsWith('mcp__') && n.endsWith('search_products')) {
+    const what = args.query ?? args.category
+    return `Searching the catalog${what ? `: ${what}` : ''}`
+  }
   if (n.startsWith('mcp__') && n.endsWith('get_product')) return 'Checking a product'
   if (n === 'exec') return 'Searching the catalog'
   if (n === 'write' || n === 'edit') return 'Building your looks'
