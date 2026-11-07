@@ -304,7 +304,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       return {
         status: "success",
         output: {
-          added: { product_id: id, ...(v.args.size ? { size: v.args.size } : {}), ...(v.args.color ? { color: v.args.color } : {}) },
+          added: { product_id: id, ...((r.size ?? v.args.size) ? { size: r.size ?? v.args.size } : {}), ...(v.args.color ? { color: v.args.color } : {}) },
           bag_count: bag.count,
           bag_total_usd: usd(bag.total),
           left_under_limit_usd: usd(limit - bag.total),

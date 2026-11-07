@@ -1,5 +1,21 @@
 # Demo script: meet Sasha
 
+## Express version: for the video, under 2 minutes
+
+Say "in a hurry" so Sasha takes the fast path. Empty the bag and reload the page before each take.
+
+| # | You say | What should happen | About |
+|---|---|---|---|
+| 1 | *(Click Start video call.)* | Sasha introduces herself and asks your name. | 0:10 |
+| 2 | "I'm Mike. I'm in a hurry. I've got a beach wedding in Italy and about a thousand dollars." | She scores your outfit in one line, and instant looks land on the outfit board. | 0:30 |
+| 3 | *(Let her talk.)* | She explains why the pieces work together. | 0:50 |
+| 4 | "Love the first one, but make the shoes darker." | A live run starts and the activity feed moves. This is the autonomy moment. She tells a short story while it runs. | 1:30 |
+| 5 | "Perfect. Add the whole look to my bag." | Every piece goes in, in a common size, and the bag count updates. | 1:45 |
+
+If the live run is slow, cut the wait in Loom's editor.
+
+## Full version: for a live demo
+
 The story: A shopper meets Sasha, shows off today's outfit, and asks for a tuxedo for a summer wedding in Italy. Sasha backs the idea and gently nudges toward linen. Instant looks land in about a second, then a ZooWork agent builds a custom look live around the suit. Target is about two minutes, including one live styling run.
 
 Say your lines as written, using your own name. Sasha's replies are live, so they'll vary. The phrases below were checked against the real catalog search.
@@ -12,8 +28,8 @@ Say your lines as written, using your own name. Sasha's replies are live, so the
 | 2 | "I'm Mike." | The camera sees your outfit. | Says what she can see, invites you to stand if you can, and asks what styles you like, all in one go. |
 | 3 | *(Stand up if you have room. Don't wait to answer.)* | She keeps talking while you move. | Waits for your answer. |
 | 4 | "Clean and classic. Nothing too flashy." | Nothing yet. | Gives your outfit a quick score out of ten, then asks what you're shopping for. |
-| 5 | "I've got a wedding in Italy this summer." | `search_products` with style Formal. The shop filters itself. | Gets excited, then asks your size so she can search the racks. |
-| 6 | "Forty regular, large in shirts, thirty-two waist, size ten shoes. I've got about fifteen hundred dollars, and I was thinking a tuxedo." | `search_products` for "tuxedo outfit". Ten full tuxedos appear. | Backs the idea, then asks if she can show something lighter for summer in Italy. |
+| 5 | "I've got a wedding in Italy this summer." | `search_products` with style Formal. The shop filters itself. | Gets excited, says some new items just came in, and asks your budget. |
+| 6 | "I've got about fifteen hundred dollars, and I was thinking a tuxedo." | `search_products` for "tuxedo outfit". Ten full tuxedos appear. | Backs the idea, then asks if she can show something lighter for summer in Italy. |
 | 7 | "Sure, show me." | `search_products` for "linen suit", then `show_product` opens the Ink Blue Double Breasted Linen Suit (MW-0374, $595). | One reason linen works for the heat, and asks what you think. |
 | 8 | "Okay, I like that. Show me some complete looks for the wedding." | Nothing yet. | Asks if you have anything to start with. |
 | 8b | "No, build the whole thing." | `style_outfit` returns pre-styled beach wedding looks in about a second. | Goes straight to the looks and asks which you like. |
@@ -21,8 +37,8 @@ Say your lines as written, using your own name. Sasha's replies are live, so the
 | 9b | *(Play along, and answer her questions.)* | The feed keeps running. Sasha nods to real steps from the agent between bits. | Asks you about yourself, like what you do for work, between stories. |
 | 10 | *(Let her finish.)* | Two or three custom looks appear on the outfit board. | "We can come back to my story later. Your looks are in." Gives the `spoken_summary` and asks which look you like. |
 | 11 | "I like the first one, but those shoes are too formal." | `style_outfit` swaps only the shoes. | Says she's swapping that piece and it'll be quicker. |
-| 12 | "Perfect. I'll take the suit." | `show_product` opens the suit. | "You're a forty regular, right?" |
-| 13 | "Yes, add it." | `add_to_bag` with MW-0374, size 40R. The bag updates. | Confirms it's in the bag, then offers a casual outfit for the rest of the trip. |
+| 12 | "Perfect. I'll take the suit." | `show_product` opens the suit. | Asks if you want it in your bag. |
+| 13 | "Yes, add it." | `add_to_bag` with MW-0374, in size 40R. The bag updates. | Confirms it's in the bag, then offers a casual outfit for the rest of the trip. |
 | 14 | "Next time. I'm good for now." | Nothing. The demo stops before payment. | Teases you once and says the bag's ready. |
 
 ## If something goes wrong

@@ -2,6 +2,15 @@
 // Contract: "Store API" in the team plan. Keep results small; avatar tool results must stay under 4 KB.
 // Loaded after app.js, so it can use app.js globals: P, L, byId, DEPTS, title, slug, filtersFrom, matches, sortProducts, CATALOG.
 (() => {
+  // A common size that's in stock, or the middle of what's left. Keeps a demo moving without size questions.
+  const COMMON_SIZES = ["40R", "40", "L", "M", "L/XL", "S/M", "32", "32x32", "10", "10D", "15.5", "One Size"];
+  const defaultSize = (p) => {
+    const inStock = p.sizes.filter((s) => p.simulated.inventory[s] > 0);
+    const waist = inStock.find((s) => /^32\b|^32W/.test(s));
+    if (waist && (p.size_type === "waist" || /pant|trouser|chino|short|jean/i.test(p.subcategory))) return waist;
+    return COMMON_SIZES.find((s) => inStock.includes(s)) ?? inStock[Math.floor(inStock.length / 2)];
+  };
+
   const BAG_KEY = "barn.bag", BAG_LIMIT = 10000, LOOKS_KEY = "barn.looks";
   const loadBag = () => { try { return JSON.parse(localStorage.getItem(BAG_KEY)) || []; } catch { return []; } };
   const saveBag = (b) => { try { localStorage.setItem(BAG_KEY, JSON.stringify(b)); } catch {} };
@@ -65,13 +74,14 @@
       return { ok: true, slug: slug(l.name), name: l.name, pieces: l.items.length };
     },
 
+    // size is optional: without one, or if it's sold out, the bag uses a common in-stock size.
     addToBag(id, size, color) {
       const p = byId[id];
       if (!p) return { ok: false, error: `No product with id ${id}`, count: count() };
       const inv = p.simulated.inventory;
-      const sz = p.size_type === "one" ? p.sizes[0] : size && pick(size, p.sizes);
-      if (!sz) return { ok: false, error: `Which size? In stock: ${p.sizes.filter((s) => inv[s] > 0).join(", ")}`, count: count() };
-      if (!(inv[sz] > 0)) return { ok: false, error: `Size ${sz} is out of stock`, count: count() };
+      const asked = p.size_type === "one" ? p.sizes[0] : size && pick(size, p.sizes);
+      const sz = asked && inv[asked] > 0 ? asked : defaultSize(p);
+      if (!sz) return { ok: false, error: "That item is out of stock", count: count() };
       const col = color ? pick(color, p.colors) : p.colors[0];
       if (!col) return { ok: false, error: `Colors available: ${p.colors.join(", ")}`, count: count() };
       const bag = loadBag(), line = bag.find((x) => x.id === p.id && x.size === sz && x.color === col);
@@ -81,7 +91,7 @@
       line ? line.qty++ : bag.push({ id: p.id, size: sz, color: col, qty: 1 });
       saveBag(bag);
       dispatchEvent(new CustomEvent("barn:bag", { detail: { action: "add", id: p.id, size: sz, color: col } }));
-      return { ok: true, error: null, count: count() };
+      return { ok: true, error: null, count: count(), size: sz, color: col };
     },
 
     // For the bag drawer, not the avatar. qty 0 removes the line.

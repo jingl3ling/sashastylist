@@ -29,6 +29,8 @@ export interface BarnSearchFilters {
 export type BarnOpenResult = ({ ok: true; colors: string[]; sizes: string[] } & BarnBrief) | { ok: false; error: string };
 
 export interface BarnAddResult {
+  size?: string;
+  color?: string;
   ok: boolean;
   error: string | null;
   count: number;

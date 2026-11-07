@@ -6721,7 +6721,7 @@ function Tu(t, e) {
       return {
         status: "success",
         output: {
-          added: { product_id: _, ...b.args.size ? { size: b.args.size } : {}, ...b.args.color ? { color: b.args.color } : {} },
+          added: { product_id: _, ...A.size ?? b.args.size ? { size: A.size ?? b.args.size } : {}, ...b.args.color ? { color: b.args.color } : {} },
           bag_count: x.count,
           bag_total_usd: Ft(x.total),
           left_under_limit_usd: Ft(i - x.total)

@@ -79,7 +79,7 @@
   },
   {
     "name": "add_to_bag",
-    "description": "Add one product to the shopper's bag. ONLY call this after the shopper has said yes out loud, in this conversation, to adding this exact item in this size (and colour, if it comes in more than one). Interest is not a yes. Never add closet items. The bag has a hard limit of 10,000 dollars per conversation, enforced here. Returns the bag count and total, or a short reason it failed (size out of stock, over the limit).",
+    "description": "Add one product to the shopper's bag. Only call this after the shopper says yes to adding it. For a whole look, call it once per catalog piece. Size is optional: leave it out and the store picks a common in-stock size. Never add closet items. The bag has a hard limit of 10,000 dollars per conversation, enforced here. Returns the size added, the bag count and total, or a short reason it failed.",
     "parameters": {
       "type": "object",
       "properties": {
@@ -89,7 +89,7 @@
         },
         "size": {
           "type": "string",
-          "description": "Confirmed size as the product lists it, e.g. '40R', 'M', '10'. Omit only for one-size items."
+          "description": "A size the shopper told you, e.g. '40R', 'M', '10'. Leave it out if they haven't said."
         },
         "color": {
           "type": "string",
