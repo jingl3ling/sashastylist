@@ -22,6 +22,8 @@
 .stylist-feed li::before { content: "…"; color: var(--color-muted); }
 .stylist-feed li[data-status="end"]::before { content: "✓"; color: var(--color-success); }
 .stylist-feed li[data-status="blocked"]::before { content: "!"; color: var(--color-error); font-weight: 500; }
+.stylist-feed li[data-status="stopped"]::before { content: "–"; color: var(--color-muted); }
+.stylist-feed li[data-status="stopped"] { color: var(--color-muted); }
 .stylist-feed .feed-count { color: var(--color-muted); font-variant-numeric: tabular-nums; }
 
 .stylist-form { margin-top: auto; display: flex; gap: var(--space-xs); align-items: end; }

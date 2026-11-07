@@ -109,6 +109,7 @@
       Barn.lastLooks = result;
       try { sessionStorage.setItem(LOOKS_KEY, JSON.stringify(result)); } catch {}
       dispatchEvent(new CustomEvent("barn:looks", { detail: result }));
+      Barn.stopFeed("end"); // the run finished: any step still spinning is done
       if (location.hash === "#/stylist") stylistPage(); else location.hash = "#/stylist";
       return { ok: true, looks: result.looks.length };
     },
@@ -132,14 +133,20 @@
         feed.byId.set(id, row);
       }
       row.steps.set(id, status);
-      const states = [...row.steps.values()], n = row.steps.size;
-      row.li.dataset.status = states.includes("blocked") ? "blocked" : states.includes("start") ? "start" : "end";
-      // Label and count share one element: the row is a two-column grid (status mark, text).
-      const text = document.createElement("span");
-      text.textContent = row.key;
-      if (n > 1) { const c = document.createElement("span"); c.className = "feed-count"; c.textContent = ` ×${n}`; text.append(c); }
-      row.li.replaceChildren(text);
+      // A run-level failure (Soham's typed-brief path posts it as id "error") means nothing else is still running.
+      if (id === "error" && status === "blocked") Barn.stopFeed();
+      paintRow(row);
       list.closest(".stylist-feed").hidden = false;
+      return { ok: true };
+    },
+
+    // Marks every step still running as stopped (after a failed or abandoned run), so no spinner keeps claiming work.
+    stopFeed(to = "stopped") {
+      for (const row of feed.byLabel.values()) {
+        let changed = false;
+        for (const [k, v] of row.steps) if (v === "start") { row.steps.set(k, to); changed = true; }
+        if (changed) paintRow(row);
+      }
       return { ok: true };
     },
 
@@ -152,6 +159,16 @@
   };
   const count = () => Barn.getBag().count;
   const feed = { byId: new Map(), byLabel: new Map() }; // activity feed rows (see addFeedStep)
+  // Status mark: blocked if any step is blocked, else running if any runs, else stopped if any was cut off, else done.
+  function paintRow(row) {
+    const states = [...row.steps.values()], n = row.steps.size;
+    row.li.dataset.status = states.includes("blocked") ? "blocked" : states.includes("start") ? "start" : states.includes("stopped") ? "stopped" : "end";
+    // Label and count share one element: the row is a two-column grid (status mark, text).
+    const text = document.createElement("span");
+    text.textContent = row.key;
+    if (n > 1) { const c = document.createElement("span"); c.className = "feed-count"; c.textContent = ` ×${n}`; text.append(c); }
+    row.li.replaceChildren(text);
+  }
 
   Barn.ready = CATALOG.then(() => { if (!P.length) throw new Error("The catalog did not load"); return Barn; });
   window.Barn = Barn;

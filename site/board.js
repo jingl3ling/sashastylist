@@ -62,15 +62,31 @@
       <ol class="board-items">${look.items.map((it) => itemRow(look, li, it)).join("")}</ol></article>`;
   }
 
+  // Never draw a blank piece: keep only known products and named closet pieces (an agent slip once sent empty closet items).
+  const usable = (it) => Boolean((it.product_id && byId[it.product_id]) || (typeof it.closet_item === "string" && it.closet_item.trim()));
+
+  const EXAMPLE = "I have a summer wedding in Italy and about $800 to spend.";
+  function emptyBoard(note) {
+    main.innerHTML = `<div class="container board board-empty"><h1>Your looks</h1>
+      <p class="lead">${esc(note || "Ask your stylist for an outfit. Three looks will appear here, every piece with a reason.")}</p>
+      <p class="board-try">Try: “${esc(EXAMPLE)}”</p>
+      <button class="btn" type="button" id="board-example">Use this example</button></div>`;
+    // Fill the stylist's text box (not submit, so nothing runs by accident); on phones, open the panel first.
+    document.getElementById("board-example").addEventListener("click", () => {
+      const panel = document.getElementById("stylist"), input = document.getElementById("stylist-input");
+      if (getComputedStyle(document.getElementById("stylist-toggle")).display !== "none" && !panel.hasAttribute("data-open")) document.getElementById("stylist-toggle").click();
+      input.value = EXAMPLE;
+      input.focus();
+    });
+  }
+
   window.stylistPage = function () {
     const r = Barn.lastLooks;
-    if (!r?.looks?.length) {
-      main.innerHTML = `<div class="container board board-empty"><h1>Your looks</h1>
-        <p class="lead">Ask your stylist for an outfit. Three looks will appear here, every piece with a reason.</p>
-        <p class="board-try">Try: “I have a summer wedding in Italy and about $800 to spend.”</p></div>`;
-      return;
-    }
+    if (!r?.looks?.length) return emptyBoard();
+    // Keep each look's original index so the "Swapped in" comparison still lines up after filtering.
+    const cards = r.looks.map((l, li) => [{ ...l, items: (l.items || []).filter(usable) }, li]).filter(([l]) => l.items.length).slice(0, 3);
+    if (!cards.length) return emptyBoard("The stylist's last answer had no pieces I could show. Ask again and I'll build fresh looks.");
     main.innerHTML = `<div class="container board"><div class="board-head"><h1>Your looks</h1>${r.spoken_summary ? `<p class="lead">${esc(r.spoken_summary)}</p>` : ""}</div>
-      <div class="board-looks">${r.looks.slice(0, 3).map(lookCard).join("")}</div></div>`;
+      <div class="board-looks">${cards.map(([l, li]) => lookCard(l, li)).join("")}</div></div>`;
   };
 })();
