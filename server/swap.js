@@ -5,6 +5,7 @@ import { catalog, matchSize } from './validate.js'
 
 const dept = (p) => p.gender ?? 'men' // a catalog without a gender field is men's only
 const inStock = (p) => Object.values(p.simulated?.inventory ?? {}).some((n) => n > 0)
+export const isSoldOut = (p) => !inStock(p)
 const round = (n) => Math.round(n * 100) / 100
 const brief = (p, base) => ({
   id: p.id,
