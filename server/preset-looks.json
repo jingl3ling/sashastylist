@@ -1,0 +1,626 @@
+{
+  "themes": {
+    "formal-wedding": {
+      "men": [
+        {
+          "outfit_name": "Classic Black Tuxedo",
+          "items": [
+            {
+              "product_id": "MW-0490",
+              "slot": "Tuxedo Jacket",
+              "why": "Black stretch tuxedo jacket with a peak lapel is the most traditional, formal choice for an evening wedding."
+            },
+            {
+              "product_id": "MW-0512",
+              "slot": "Tuxedo Pants",
+              "why": "Matching black flat-front tuxedo pants give a clean, uninterrupted line and the full formality black tie calls for."
+            },
+            {
+              "product_id": "MW-0066",
+              "slot": "Dress Shirt",
+              "why": "A crisp solid white tuxedo shirt gives classic contrast against the black jacket and suits formal ceremonies."
+            },
+            {
+              "product_id": "MW-0193",
+              "slot": "Bow Tie",
+              "why": "A black silk shantung bow tie adds a subtle sheen and the traditional neckwear expected with a tuxedo."
+            },
+            {
+              "product_id": "MW-0134",
+              "slot": "Cummerbund",
+              "why": "A black cummerbund covers the waistline and adds a traditional formal detail that polishes the tuxedo look."
+            },
+            {
+              "product_id": "MW-0129",
+              "slot": "Cufflinks",
+              "why": "Silver laurel cufflinks add a refined metallic accent at the cuffs of a formal french-cuff shirt."
+            },
+            {
+              "product_id": "MW-0136",
+              "slot": "Pocket Square",
+              "why": "A white silk shantung pocket square adds a crisp, elegant pop of contrast to the black lapel."
+            },
+            {
+              "product_id": "MW-0083",
+              "slot": "Dress Shoes",
+              "why": "Black patent derby shoes have the high-gloss finish that traditionally completes a formal tuxedo outfit."
+            },
+            {
+              "product_id": "MW-0312",
+              "slot": "Socks",
+              "why": "Dark dress socks in an extended crew length keep the ankle covered and blend quietly with formal black shoes."
+            }
+          ],
+          "total_usd": 1195
+        },
+        {
+          "outfit_name": "White Dinner Jacket",
+          "items": [
+            {
+              "product_id": "MW-0492",
+              "slot": "Tuxedo Jacket",
+              "why": "A cream dinner jacket with white peak lapels is a classic warm-weather formal option that stands out at weddings."
+            },
+            {
+              "product_id": "MW-0512",
+              "slot": "Tuxedo Pants",
+              "why": "Black flat-front tuxedo pants contrast sharply with the cream jacket, following traditional dinner jacket formalwear conventions."
+            },
+            {
+              "product_id": "MW-0059",
+              "slot": "Dress Shirt",
+              "why": "A slim cotton fly-front dress shirt gives a clean, formal base beneath the cream jacket."
+            },
+            {
+              "product_id": "MW-0193",
+              "slot": "Bow Tie",
+              "why": "A black silk shantung bow tie anchors the light jacket and adds a formal, lustrous finishing touch."
+            },
+            {
+              "product_id": "MW-0129",
+              "slot": "Cufflinks",
+              "why": "Silver laurel cufflinks bring a polished metallic detail that suits the cream jacket and formal shirt."
+            },
+            {
+              "product_id": "MW-0141",
+              "slot": "Pocket Square",
+              "why": "A black knit pocket square echoes the bow tie and trousers while adding subtle texture to the cream lapel."
+            },
+            {
+              "product_id": "MW-0083",
+              "slot": "Dress Shoes",
+              "why": "Black patent derby shoes provide a glossy formal finish and tie in with the black trousers."
+            },
+            {
+              "product_id": "MW-0312",
+              "slot": "Socks",
+              "why": "Dark dress socks in an extended crew length stay discreet and keep the formal black-shoe look seamless."
+            }
+          ],
+          "total_usd": 1326
+        },
+        {
+          "outfit_name": "Midnight Navy Tuxedo",
+          "items": [
+            {
+              "product_id": "MW-0491",
+              "slot": "Tuxedo Jacket",
+              "why": "A navy stretch tuxedo jacket with peak lapel gives a modern, rich alternative to black for formal weddings."
+            },
+            {
+              "product_id": "MW-0513",
+              "slot": "Tuxedo Pants",
+              "why": "Matching navy flat-front tuxedo pants keep the suit tonal and formal with a sleek, uninterrupted line."
+            },
+            {
+              "product_id": "MW-0066",
+              "slot": "Dress Shirt",
+              "why": "A solid white tuxedo shirt gives crisp, classic contrast that makes the deep navy look sharper."
+            },
+            {
+              "product_id": "MW-0194",
+              "slot": "Bow Tie",
+              "why": "A navy silk shantung bow tie keeps the look tonal while adding a refined sheen and formal polish."
+            },
+            {
+              "product_id": "MW-0129",
+              "slot": "Cufflinks",
+              "why": "Silver laurel cufflinks add a cool metallic accent that pairs well with navy and white."
+            },
+            {
+              "product_id": "MW-0143",
+              "slot": "Pocket Square",
+              "why": "A navy knit pocket square repeats the jacket color for a cohesive, subtly textured finishing detail."
+            },
+            {
+              "product_id": "MW-0083",
+              "slot": "Dress Shoes",
+              "why": "Black patent derby shoes add a high-shine formal finish that pairs well with midnight navy."
+            },
+            {
+              "product_id": "MW-0312",
+              "slot": "Socks",
+              "why": "True navy or black dress socks in an extended crew length blend discreetly with the tuxedo trousers and shoes."
+            }
+          ],
+          "total_usd": 1186
+        }
+      ],
+      "women": [
+        {
+          "outfit_name": "Black Tulle Gown",
+          "items": [
+            {
+              "product_id": "WW-0195",
+              "slot": "Gown",
+              "why": "Layered black tulle in a floor-length gown silhouette reads elegant and formal, a classic evening choice for a wedding."
+            },
+            {
+              "product_id": "WW-0338",
+              "slot": "Heels",
+              "why": "Black leather heels with a dressy, polished cut match the gown's tone and keep the formality high."
+            },
+            {
+              "product_id": "WW-0053",
+              "slot": "Clutch",
+              "why": "A structured noir flap clutch with a tassel adds refined, evening-appropriate detail in the same black as the gown."
+            },
+            {
+              "product_id": "WW-0255",
+              "slot": "Earrings",
+              "why": "Sparkling crystal chandelier drops add formal glamour and catch the light against the dark tulle for evening celebrations."
+            },
+            {
+              "product_id": "WW-0248",
+              "slot": "Bracelets",
+              "why": "A slim tennis bracelet of linked stones adds subtle sparkle without competing with the statement earrings."
+            }
+          ],
+          "total_usd": 1743.75
+        },
+        {
+          "outfit_name": "Emerald Satin",
+          "items": [
+            {
+              "product_id": "WW-0213",
+              "slot": "Maxi Dress",
+              "why": "Luxe emerald satin in a flowing maxi cut with fringe movement feels rich, celebratory and wedding appropriate."
+            },
+            {
+              "product_id": "WW-0335",
+              "slot": "Heels",
+              "why": "Gold slingback sandals with crystal detail dress up the look and complement emerald satin with warm metallic shine."
+            },
+            {
+              "product_id": "WW-0054",
+              "slot": "Clutch",
+              "why": "A gold oro flap clutch with tassel echoes the metallic sandals and gives the green dress a polished finish."
+            },
+            {
+              "product_id": "WW-0253",
+              "slot": "Earrings",
+              "why": "Gold pearl earrings bring soft, classic elegance that flatters the deep emerald without overpowering the neckline."
+            },
+            {
+              "product_id": "WW-0265",
+              "slot": "Necklaces",
+              "why": "A delicate gold necklace layers a warm metallic accent against the satin, keeping the styling understated and refined."
+            }
+          ],
+          "total_usd": 1715
+        },
+        {
+          "outfit_name": "Burgundy Sequins",
+          "items": [
+            {
+              "product_id": "WW-0221",
+              "slot": "Maxi Dress",
+              "why": "Burgundy sequins in a full-length maxi cut deliver rich, glamorous color suited to an evening black-tie-leaning wedding."
+            },
+            {
+              "product_id": "WW-0332",
+              "slot": "Heels",
+              "why": "Black slingback heeled sandals with crystal embellishment add dressy sparkle and ground the deep burgundy sequins."
+            },
+            {
+              "product_id": "WW-0053",
+              "slot": "Clutch",
+              "why": "A black noir tassel clutch gives a sleek, formal contrast to the sparkling burgundy gown."
+            },
+            {
+              "product_id": "WW-0258",
+              "slot": "Earrings",
+              "why": "Gold hoop earrings add a warm, polished accent that suits burgundy without distracting from the sequined dress."
+            }
+          ],
+          "total_usd": 1691.3
+        }
+      ]
+    },
+    "beach-wedding": {
+      "men": [
+        {
+          "outfit_name": "Solid Tan Suit",
+          "items": [
+            {
+              "product_id": "MW-0358",
+              "slot": "Suit",
+              "why": "A solid tan stretch suit gives a formal, tailored look in a light sand tone that suits a seaside ceremony."
+            },
+            {
+              "product_id": "MW-0277",
+              "slot": "Button-Up",
+              "why": "Breathable linen in white keeps the look cool and relaxed in beach heat while still pairing cleanly with a suit."
+            },
+            {
+              "product_id": "MW-0092",
+              "slot": "Loafers",
+              "why": "Tan suede loafers match the suit's warm tone and add a laid-back, sand-friendly finish without lace-up formality."
+            },
+            {
+              "product_id": "MW-0035",
+              "slot": "Belt",
+              "why": "A mid-brown leather belt ties the loafers to the suit and adds polish in a natural, earthy shade."
+            },
+            {
+              "product_id": "MW-0143",
+              "slot": "Pocket Square",
+              "why": "A navy knit pocket square adds a formal contrast against the tan and a nautical touch."
+            }
+          ],
+          "total_usd": 911.25
+        },
+        {
+          "outfit_name": "Seersucker Separates",
+          "items": [
+            {
+              "product_id": "MW-0334",
+              "slot": "Sport Coat",
+              "why": "Light blue and white seersucker is a classic warm-weather fabric, with its puckered texture keeping the blazer airy and coastal."
+            },
+            {
+              "product_id": "MW-0469",
+              "slot": "Dress Pants",
+              "why": "Flax linen pants are lightweight and breathable, with a soft sandy color that complements the seersucker jacket."
+            },
+            {
+              "product_id": "MW-0284",
+              "slot": "Button-Up",
+              "why": "A tech linen button-up in a light shade wicks heat and brings relaxed, tailored polish under the blazer."
+            },
+            {
+              "product_id": "MW-0092",
+              "slot": "Loafers",
+              "why": "Tan suede loafers keep the outfit breezy and sandy-toned, suited to a casual-leaning beach ceremony."
+            },
+            {
+              "product_id": "MW-0035",
+              "slot": "Belt",
+              "why": "The mid-brown leather belt complements the tan loafers and flax pants, adding a clean, finished waistline."
+            },
+            {
+              "product_id": "MW-0196",
+              "slot": "Bow Tie",
+              "why": "A dusty blue grosgrain bow tie picks up the seersucker stripes and adds a playful, formal accent."
+            }
+          ],
+          "total_usd": 726.5
+        },
+        {
+          "outfit_name": "Stone Crosshatch Suit",
+          "items": [
+            {
+              "product_id": "MW-0359",
+              "slot": "Suit",
+              "why": "An unstructured stone crosshatch suit has a soft, relaxed cut and neutral color that feels formal yet seaside-appropriate."
+            },
+            {
+              "product_id": "MW-0267",
+              "slot": "Button-Up",
+              "why": "A navy linen sport shirt gives breathable texture and deep color contrast against the light stone suit."
+            },
+            {
+              "product_id": "MW-0092",
+              "slot": "Loafers",
+              "why": "Tan suede loafers add soft texture and an easy, no-socks beach feel that works with the neutral suit."
+            },
+            {
+              "product_id": "MW-0035",
+              "slot": "Belt",
+              "why": "A mid-brown leather belt grounds the light suit and coordinates with the tan suede loafers."
+            },
+            {
+              "product_id": "MW-0205",
+              "slot": "Necktie",
+              "why": "A steel blue herringbone tie adds woven texture and a cool tone that sits well with navy and stone."
+            }
+          ],
+          "total_usd": 883
+        }
+      ],
+      "women": [
+        {
+          "outfit_name": "Sunset Maxi",
+          "items": [
+            {
+              "product_id": "WW-0209",
+              "slot": "Maxi Dress",
+              "why": "Breezy indigo chambray maxi has a relaxed resort cut that suits sand and sea air while still looking dressed."
+            },
+            {
+              "product_id": "WW-0360",
+              "slot": "Sandals",
+              "why": "Natural raffia crosshatch wide sandals add woven texture and a flat, sand-friendly base that keeps the look casual and polished."
+            },
+            {
+              "product_id": "WW-0055",
+              "slot": "Clutch",
+              "why": "Natural tan raffia clutch brings coastal texture and a structured formal shape that lifts the relaxed chambray dress."
+            },
+            {
+              "product_id": "WW-0257",
+              "slot": "Earrings",
+              "why": "Small gold hoops add a subtle warm shine that flatters indigo without overpowering a relaxed seaside ceremony."
+            },
+            {
+              "product_id": "WW-0246",
+              "slot": "Bracelets",
+              "why": "Sparkling tennis bracelet adds delicate, dressy glitter that suits a celebration while staying light for warm beach weather."
+            }
+          ],
+          "total_usd": 769
+        },
+        {
+          "outfit_name": "Garden Party Dress",
+          "items": [
+            {
+              "product_id": "WW-0151",
+              "slot": "Dress",
+              "why": "Gilded metallic-toned dress feels festive and elegant, catching golden-hour light at an oceanfront celebration."
+            },
+            {
+              "product_id": "WW-0334",
+              "slot": "Heels",
+              "why": "Light natural raffia heels offer formal polish with woven beachy texture that pairs well with a gilded dress."
+            },
+            {
+              "product_id": "WW-0052",
+              "slot": "Clutch",
+              "why": "Natural tan convertible clutch is formal enough for a wedding and its neutral tone complements the gilded dress."
+            },
+            {
+              "product_id": "WW-0252",
+              "slot": "Earrings",
+              "why": "Gold and pearl earrings add classic bridal-friendly elegance with a soft, ocean-inspired luster."
+            }
+          ],
+          "total_usd": 1177.75
+        },
+        {
+          "outfit_name": "Easy Jumpsuit",
+          "items": [
+            {
+              "product_id": "WW-0201",
+              "slot": "Jumpsuit",
+              "why": "Flowing chiffon jumpsuit in sage floral print is airy, formal and cool, giving dress-level polish in coastal breezes."
+            },
+            {
+              "product_id": "WW-0359",
+              "slot": "Sandals",
+              "why": "Camel suede sandals give a warm neutral, understated base that grounds the sage print without feeling too dressy."
+            },
+            {
+              "product_id": "WW-0051",
+              "slot": "Clutch",
+              "why": "Gold crochet clutch adds handmade texture and a festive metallic glint that suits a daytime beach reception."
+            },
+            {
+              "product_id": "WW-0269",
+              "slot": "Necklaces",
+              "why": "Delicate necklace in soft champagne tones adds gentle shine and a casual finish that keeps the jumpsuit light."
+            }
+          ],
+          "total_usd": 416.6
+        }
+      ]
+    },
+    "beach-vacation": {
+      "men": [
+        {
+          "outfit_name": "Poolside Linen",
+          "items": [
+            {
+              "product_id": "MW-0412",
+              "slot": "Swim Trunks",
+              "why": "Navy swim trunks stay classic and quick-drying, and the dark solid color pairs easily with a light linen shirt."
+            },
+            {
+              "product_id": "MW-0278",
+              "slot": "Button-Up",
+              "why": "Breathable linen in a relaxed camp-collar cut keeps you cool in the heat and looks polished by the pool."
+            },
+            {
+              "product_id": "MW-0094",
+              "slot": "Sandals",
+              "why": "White molded slides drain water and dry fast, so they are easy to slip on between the pool and lounge."
+            },
+            {
+              "product_id": "MW-0012",
+              "slot": "Sunglasses",
+              "why": "Green mirror lenses on a frost grey frame cut sun glare and add a cool, modern edge to a beach look."
+            },
+            {
+              "product_id": "MW-0158",
+              "slot": "Hat",
+              "why": "A navy and stone reversible bucket hat shades your face and neck, and the neutral colors match the navy trunks."
+            }
+          ],
+          "total_usd": 472.5
+        },
+        {
+          "outfit_name": "Boardwalk Casual",
+          "items": [
+            {
+              "product_id": "MW-0301",
+              "slot": "Shorts",
+              "why": "Lightweight linen shorts with a drawstring waist stay airy and comfortable for long walks along a warm boardwalk."
+            },
+            {
+              "product_id": "MW-0414",
+              "slot": "Tee",
+              "why": "A soft, stretchy knit crew tee in dark eclipse tones layers easily and stays comfortable in coastal humidity."
+            },
+            {
+              "product_id": "MW-0097",
+              "slot": "Sandals",
+              "why": "Black flip-flops are lightweight and casual, and the dark color hides sand and wear while keeping the outfit relaxed."
+            },
+            {
+              "product_id": "MW-0015",
+              "slot": "Sunglasses",
+              "why": "Classic Havana frames with green lenses give strong sun protection and a timeless, polished finish to casual shorts."
+            },
+            {
+              "product_id": "MW-0008",
+              "slot": "Bag",
+              "why": "A roomy weekender bag in warm anejo-brown leather holds towels and essentials, and its rich color complements the neutral clothes."
+            }
+          ],
+          "total_usd": 1026
+        },
+        {
+          "outfit_name": "Surf Day",
+          "items": [
+            {
+              "product_id": "MW-0400",
+              "slot": "Swim Trunks",
+              "why": "Black board shorts in a durable, quick-drying cut move freely in the water and hide salt and sand marks."
+            },
+            {
+              "product_id": "MW-0422",
+              "slot": "Tee",
+              "why": "A sport blue tee with a floral print adds playful surf-inspired color and a relaxed cotton feel over black shorts."
+            },
+            {
+              "product_id": "MW-0094",
+              "slot": "Sandals",
+              "why": "White slides are easy to kick off at the shoreline, and their cushioned footbed is comfortable on hot sand."
+            },
+            {
+              "product_id": "MW-0158",
+              "slot": "Hat",
+              "why": "The reversible navy and stone bucket hat gives wide-brim shade and lets you switch colors to suit the day."
+            },
+            {
+              "product_id": "MW-0012",
+              "slot": "Sunglasses",
+              "why": "Mirror-lens sunglasses in a frost grey frame reduce glare off the water and suit a casual streetwear surf look."
+            }
+          ],
+          "total_usd": 423
+        }
+      ],
+      "women": [
+        {
+          "outfit_name": "Poolside One-Piece",
+          "items": [
+            {
+              "product_id": "WW-0412",
+              "slot": "One-Piece",
+              "why": "Seersucker fabric with a mini stripe in deep blue gives a textured, breathable one-piece with classic resort charm."
+            },
+            {
+              "product_id": "WW-0409",
+              "slot": "Cover-Up",
+              "why": "A wrap-style maxi cover-up in black or mango drapes loosely, giving easy coverage from pool to lunch."
+            },
+            {
+              "product_id": "WW-0360",
+              "slot": "Sandals",
+              "why": "Wide raffia-woven straps in light natural tone keep the sandals casual, airy and well suited to warm sand."
+            },
+            {
+              "product_id": "WW-0011",
+              "slot": "Hats",
+              "why": "An open-weave natural wide brim hat gives breathable shade and a polished, relaxed resort finish."
+            },
+            {
+              "product_id": "WW-0020",
+              "slot": "Sunglasses",
+              "why": "Casual sunglasses in an assorted tortoise-style finish protect against glare and keep the look relaxed."
+            },
+            {
+              "product_id": "WW-0072",
+              "slot": "Tote",
+              "why": "A caramel raffia tote is lightweight and roomy for towels and sunscreen, and echoes the natural textures."
+            }
+          ],
+          "total_usd": 1268
+        },
+        {
+          "outfit_name": "Bikini and Pareo",
+          "items": [
+            {
+              "product_id": "WW-0399",
+              "slot": "Bikini Top",
+              "why": "The playful printed bikini top is a fun, resort-style swim piece with a flattering cut for sunbathing."
+            },
+            {
+              "product_id": "WW-0389",
+              "slot": "Bikini Bottom",
+              "why": "Matching printed bikini bottoms complete the swim set, keeping the colorful pattern consistent from top to bottom."
+            },
+            {
+              "product_id": "WW-0401",
+              "slot": "Cover-Up",
+              "why": "A mango pareo knots easily at the waist, adding a warm color and breezy coverage over swimwear."
+            },
+            {
+              "product_id": "WW-0359",
+              "slot": "Sandals",
+              "why": "Camel suede sandals add a soft neutral tone that pairs easily with bright swimwear and a mango pareo."
+            },
+            {
+              "product_id": "WW-0011",
+              "slot": "Hats",
+              "why": "The natural open-weave wide brim hat shades the face while its neutral color suits any swimwear print."
+            },
+            {
+              "product_id": "WW-0072",
+              "slot": "Tote",
+              "why": "Caramel raffia has a woven beach-friendly texture and warm color that match the hat and sandals."
+            }
+          ],
+          "total_usd": 1075
+        },
+        {
+          "outfit_name": "Boardwalk Mini",
+          "items": [
+            {
+              "product_id": "WW-0233",
+              "slot": "Mini Dress",
+              "why": "A floral hibiscus mini dress is light, short and cheerful, ideal for warm walks along the boardwalk."
+            },
+            {
+              "product_id": "WW-0359",
+              "slot": "Sandals",
+              "why": "Camel suede sandals keep the outfit casual and comfortable, and the warm neutral tone balances the floral print."
+            },
+            {
+              "product_id": "WW-0020",
+              "slot": "Sunglasses",
+              "why": "Casual sunglasses in an assorted finish cut sun glare and add a polished touch to a simple mini dress."
+            },
+            {
+              "product_id": "WW-0246",
+              "slot": "Bracelets",
+              "why": "A delicate tennis bracelet adds subtle sparkle to bare arms without overpowering the casual floral dress."
+            }
+          ],
+          "total_usd": 760
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-11-07T18:33:20.671Z"
+}
