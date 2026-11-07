@@ -62,8 +62,8 @@ export function stylistClient(opts: StylistClientOptions): StyleOutfitFn {
       if (ev.type === "step") opts.onStep?.({ id: ev.id, label: ev.label, status: ev.status });
       else if (ev.type === "error") throw new StylistRunError(ev.message);
       else if (ev.type === "result") {
-        const { looks, spoken_summary, lookbook_artifact } = ev;
-        return { looks, spoken_summary, lookbook_artifact };
+        const { looks, spoken_summary, lookbook_artifact, warnings } = ev;
+        return { looks, spoken_summary, lookbook_artifact, ...(warnings?.length ? { warnings } : {}) };
       }
     }
     throw new Error("stylist stream ended without a result");

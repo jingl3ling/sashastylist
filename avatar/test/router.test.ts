@@ -295,6 +295,48 @@ describe("style_outfit", () => {
     assert.match(text, /use the size listed here/);
   });
 
+  it("instant only for the first look of a call; later requests run live", async () => {
+    const seen: RunRequest[] = [];
+    const preset = async (req: RunRequest) => {
+      seen.push(req);
+      const r = await mockStylist(["MW-0374"], 0)(req);
+      return req.instant ? { ...r, warnings: ["preset looks"] } : r;
+    };
+    const { router } = setup({ styleOutfit: preset, instant: true });
+    await router.handle(call("style_outfit", { occasion: "beach wedding", budget_usd: 1500 }));
+    await router.handle(call("style_outfit", { occasion: "dinner on the trip", budget_usd: 800 }));
+    assert.equal(seen[0].instant, true, "first look: preset");
+    assert.ok(!("instant" in seen[1]), "second look: live agent");
+    const other = setup({ styleOutfit: preset, instant: true });
+    await other.router.handle(call("style_outfit", { occasion: "beach wedding", budget_usd: 1500 }, "conv-other"));
+    assert.equal(seen[2].instant, true, "a new call gets its own first look");
+  });
+
+  it("a rework of preset looks runs live with the looks spelled out in notes", async () => {
+    const seen: RunRequest[] = [];
+    const run = async (req: RunRequest) => {
+      seen.push(req);
+      if (req.instant) {
+        return {
+          looks: [{ outfit_name: "Sand", total_usd: 700, items: [{ product_id: "MW-0374", slot: "Suit", why: "w", size: "40R" }, { product_id: "MW-0094", slot: "Shoes", why: "w", size: "10" }] }],
+          spoken_summary: "s",
+          warnings: ["preset looks"],
+        };
+      }
+      return mockStylist(["MW-0374"], 0)(req);
+    };
+    const { router } = setup({ styleOutfit: run, instant: true });
+    await router.handle(call("style_outfit", { occasion: "beach wedding", budget_usd: 1500 }));
+    await router.handle(call("style_outfit", { occasion: "beach wedding", budget_usd: 1500, rework_slot: "Shoes", rework_feedback: "too formal" }));
+    const rw = seen[1];
+    assert.ok(!("rework" in rw) && !("instant" in rw), "a full live run, not a Session rework");
+    assert.match(rw.notes!, /Look 1 "Sand": Suit MW-0374 size 40R, Shoes MW-0094 size 10\./);
+    assert.match(rw.notes!, /Change only the Shoes piece in each look \(feedback: too formal\)/);
+    // The next change continues the live Session normally.
+    await router.handle(call("style_outfit", { occasion: "beach wedding", budget_usd: 1500, rework_slot: "Shirt", rework_feedback: "too bright" }));
+    assert.deepEqual(seen[2].rework, { slot: "Shirt", feedback: "too bright" });
+  });
+
   it("sends instant only when the backup switch is on", async () => {
     const seen: RunRequest[] = [];
     const run = async (req: RunRequest) => (seen.push(req), mockStylist([], 0)(req));
@@ -415,7 +457,7 @@ describe("stylist client (Jing's backend)", () => {
     assert.equal(requests[1].url, "http://x/api/stylist/events?run_id=r1");
     assert.equal(started, 1);
     assert.equal(steps.length, 2);
-    assert.deepEqual(r, { looks: result.looks, spoken_summary: "s", lookbook_artifact: null });
+    assert.deepEqual(r, { looks: result.looks, spoken_summary: "s", lookbook_artifact: null, warnings: ["stub data"] });
   });
 
   it("rejects on an error event, a bad status, or a stream without a result", async () => {

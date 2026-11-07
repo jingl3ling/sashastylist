@@ -182,6 +182,8 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
   let styleRunning = false;
   /** Department last used in this conversation, so a forgotten gender arg doesn't flip departments mid-call. */
   const departments = new Map<string, "men" | "women">();
+  /** Per call: whether a look has been built yet, and the last looks if they came from a preset. */
+  const styled = new Map<string, { presetLooks?: StylistResult["looks"] }>();
   const department = (ctx: HandlerContext, given: unknown) => {
     const g = normalizeGender(typeof given === "string" ? given : undefined);
     if (g) departments.set(ctx.conversationId, g);
@@ -336,15 +338,27 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         return early(`The ${limit} dollar limit for this conversation is used up by the earlier outfits and the bag. Tell the shopper no more looks this time.`);
       }
       const capped = Math.min(asked, room);
+      const callId = ctx.conversationId || "no-conversation";
+      const before = styled.get(callId);
+      const wantsRework = Boolean(a.rework_slot && a.rework_feedback);
+      // Presets answer only the first look of a call; every later request runs the live agent so the
+      // feed shows real work (Mike, Nov 7). A rework of preset looks has no agent Session behind it,
+      // so it becomes a full live run whose notes carry the current looks and the one change.
+      const reworkOfPreset = wantsRework && before?.presetLooks?.length ? before.presetLooks : undefined;
+      const notes = reworkOfPreset
+        ? [presetReworkNotes(reworkOfPreset, a.rework_slot as string, a.rework_feedback as string), a.notes as string | undefined]
+            .filter(Boolean)
+            .join(" ")
+        : (a.notes as string | undefined);
       const req: RunRequest = {
         shopper_id: shopperId,
-        conversation_id: ctx.conversationId || "no-conversation",
+        conversation_id: callId,
         occasion: a.occasion as string,
         budget_usd: capped,
-        ...(a.notes ? { notes: a.notes as string } : {}),
+        ...(notes ? { notes } : {}),
         ...(gender ? { gender } : {}),
-        ...(opts.instant ? { instant: true } : {}),
-        ...(a.rework_slot && a.rework_feedback
+        ...(opts.instant && !before && !wantsRework ? { instant: true } : {}),
+        ...(wantsRework && !reworkOfPreset
           ? { rework: { slot: a.rework_slot as string, feedback: a.rework_feedback as string } }
           : {}),
       };
@@ -373,6 +387,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
           return err("The stylist came back with no looks. Say so plainly and offer to try again.");
         }
         outfitBudgets.set(key, capped);
+        styled.set(callId, { presetLooks: res.warnings?.includes("preset looks") ? res.looks : undefined });
         try {
           await barn.showLooks(res);
         } catch (e) {
@@ -420,6 +435,19 @@ export function normalizeGender(v: string | undefined): "men" | "women" | undefi
   if (/^(women|woman|womens|female|ladies|lady|womenswear)$/.test(w)) return "women";
   if (/^(men|man|mens|male|gents|menswear)$/.test(w)) return "men";
   return undefined;
+}
+
+/** Notes for a live rework of preset looks: the agent never saw them, so spell them out. */
+export function presetReworkNotes(looks: StylistResult["looks"], slot: string, feedback: string): string {
+  const list = looks
+    .map((l, n) => {
+      const items = (l.items ?? [])
+        .map((it) => (it.product_id ? `${it.slot} ${it.product_id}${it.size ? ` size ${it.size}` : ""}` : `${it.slot} the shopper's own ${it.closet_item}`))
+        .join(", ");
+      return `Look ${n + 1} "${l.outfit_name}": ${items}.`;
+    })
+    .join(" ");
+  return `These looks are on the shopper's board now. ${list} Change only the ${slot} piece in each look (feedback: ${feedback}). Keep every other piece exactly the same, stay within budget, and return all the looks.`;
 }
 
 // ---- stylist result compaction ----

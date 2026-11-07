@@ -95,6 +95,8 @@ export interface StylistResult {
   looks: Look[];
   spoken_summary: string;
   lookbook_artifact?: string | null;
+  /** Backend notes; "preset looks" marks an instant preset answer (no agent Session behind it). */
+  warnings?: string[];
 }
 
 export type StylistEvent =
