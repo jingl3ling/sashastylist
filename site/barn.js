@@ -21,9 +21,10 @@
     ready: null,
 
     // Sets the shop URL so the page filters live, and returns the top 5 matches in page order.
+    // size: pass the shopper's size for the garment being searched (jacket "40R", shirt "15.5 / 32-33", waist "32", shoe "10").
     search(filters = {}) {
       const n = new URLSearchParams(), loose = [];
-      for (const k of ["q", "dept", "style", "brand", "color", "max_price", "sale"]) {
+      for (const k of ["q", "dept", "style", "brand", "color", "max_price", "size", "sale"]) {
         const v = filters[k];
         if (v === undefined || v === null || v === "" || v === false) continue;
         if (k === "sale") n.set("sale", "1");
@@ -34,6 +35,12 @@
       location.hash = "#/shop" + (String(n) ? "?" + n : "");
       const f = filtersFrom(n);
       return sortProducts(P.filter((p) => matches(p, f)), f.sort).slice(0, 5).map(brief);
+    },
+
+    // Look up a product without changing the page (Soham's $10,000 check uses the price).
+    getProduct(id) {
+      const p = byId[id];
+      return p ? { ok: true, ...brief(p) } : { ok: false, error: `No product with id ${id}` };
     },
 
     openProduct(id) {
