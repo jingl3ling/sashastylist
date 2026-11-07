@@ -23,6 +23,7 @@ interface AvatarConfig {
   backend?: string;
   styleOutfitMode?: "await" | "background";
   shopperId?: string;
+  instant?: boolean;
 }
 
 declare global {
@@ -36,6 +37,8 @@ const params = new URLSearchParams(location.search);
 const cfg: AvatarConfig = window.AVATAR_CONFIG ?? {};
 const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
 const backend = (params.get("backend") ?? cfg.backend ?? (isLocal ? "http://localhost:8787" : RAILWAY)).replace(/\/+$/, "");
+// Backup only: preset looks with no agent run (Jing #29). Off unless ?avatar_instant=1 or AVATAR_CONFIG.instant.
+const instant = params.get("avatar_instant") === "1" || cfg.instant === true;
 const mode = (params.get("avatar_mode") as AvatarConfig["styleOutfitMode"]) ?? cfg.styleOutfitMode ?? "background"; // Jing: runs take ~40-60 s; don't hold the tool result
 
 const barn = (): Barn | undefined => window.Barn;
@@ -64,6 +67,7 @@ const router = createRouter({
   bridge: barn,
   shopperId: cfg.shopperId,
   styleOutfitMode: mode,
+  instant,
   styleOutfit: async (req) => {
     waitTalk.start(Date.now());
     const timer = setInterval(() => waitTalk.tick(Date.now()), 1_000);
@@ -271,9 +275,19 @@ addEventListener("barn:brief", async (e) => {
   };
   const r = await router.handle(msg);
   if (r?.properties.status === "error") {
-    barn()?.addFeedStep({ id: "error", label: String(r.properties.output), status: "blocked" });
+    barn()?.addFeedStep({ id: "error", label: shopperError(String(r.properties.output)), status: "blocked" });
   }
 });
+
+/** Router errors are written for Sasha ("Say so plainly..."); the feed needs words for the shopper. */
+export function shopperError(forSasha: string): string {
+  const q = /"([^"]*(?:men|women)[^"]*\?)"/i.exec(forSasha);
+  if (q) return `${q[1]} Add it to your brief and send again.`;
+  if (/budget/i.test(forSasha)) return "Add a budget so I can build looks, e.g. “about $800”.";
+  if (/limit/i.test(forSasha)) return "That's past the $10,000 limit for this visit.";
+  if (/still being built/i.test(forSasha)) return "Still building your looks. They'll appear here in a moment.";
+  return "I couldn't finish those looks just now. Please send your brief again.";
+}
 
 // ---- boot ----
 
@@ -281,7 +295,7 @@ function boot() {
   render();
   window.Avatar = { router, start, end, log, backend, mode, get state() { return state; } };
   if (params.has("avatar_debug")) mountDebugPanel(router, log);
-  console.log(`[avatar] ready: backend ${backend}, style_outfit ${mode}`);
+  console.log(`[avatar] ready: backend ${backend}, style_outfit ${mode}${instant ? ", instant presets ON" : ""}`);
 }
 if (document.readyState === "loading") addEventListener("DOMContentLoaded", boot, { once: true });
 else boot();

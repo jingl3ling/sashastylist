@@ -268,6 +268,42 @@ describe("style_outfit", () => {
     assert.match(String(r.properties.output), /couldn't finish/);
   });
 
+  it("passes each item's size to Sasha so she adds the right one (#29)", async () => {
+    const pushed: RespondMessage[] = [];
+    const { router } = setup({
+      styleOutfitMode: "background",
+      styleOutfit: async () => ({
+        looks: [
+          {
+            outfit_name: "Linen",
+            total_usd: 640,
+            items: [
+              { product_id: "MW-0374", slot: "Suit", why: "w", size: "40R" },
+              { product_id: "MW-0158", slot: "Sunglasses", why: "w" },
+              { closet_item: "Navy chinos", slot: "Chinos", why: "w" },
+            ],
+          },
+        ],
+        spoken_summary: "One look.",
+      }),
+    });
+    await router.handle(call("style_outfit", { occasion: "w", budget_usd: 800 }), (m) => pushed.push(m));
+    await new Promise((r) => setTimeout(r, 20));
+    const text = pushed[0].properties.text;
+    assert.match(text, /Suit is product_id MW-0374, size 40R/);
+    assert.match(text, /Sunglasses is product_id MW-0158;/, "no size field, no size words");
+    assert.match(text, /use the size listed here/);
+  });
+
+  it("sends instant only when the backup switch is on", async () => {
+    const seen: RunRequest[] = [];
+    const run = async (req: RunRequest) => (seen.push(req), mockStylist([], 0)(req));
+    await setup({ styleOutfit: run }).router.handle(call("style_outfit", { occasion: "w", budget_usd: 800 }));
+    await setup({ styleOutfit: run, instant: true }).router.handle(call("style_outfit", { occasion: "w", budget_usd: 800 }));
+    assert.ok(!("instant" in seen[0]), "default: live agent run");
+    assert.equal(seen[1].instant, true);
+  });
+
   it("background mode also speaks early errors, since style_outfit is add_to_context", async () => {
     const pushed: RespondMessage[] = [];
     const { router } = setup({ styleOutfitMode: "background" });

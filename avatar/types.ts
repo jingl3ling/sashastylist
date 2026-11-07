@@ -69,6 +69,8 @@ export interface RunRequest {
   notes?: string;
   /** Department to style from. Omit when unknown: the run then ends with an error asking for it. */
   gender?: "men" | "women";
+  /** true = curated preset looks when the occasion matches (#29), no agent run. Opt-in backup only. */
+  instant?: boolean;
   rework?: { slot: string; feedback: string };
 }
 
@@ -79,6 +81,8 @@ export interface LookItem {
   closet_item?: string;
   slot: string;
   why: string;
+  /** Size to buy, from the product's own size list (#29). Optional on closet items. */
+  size?: string;
 }
 
 export interface Look {
