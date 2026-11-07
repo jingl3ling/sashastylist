@@ -25,6 +25,9 @@ const pal = {
   pal_name: "Sasha - Men's Fashion Barn",
   system_prompt: readFileSync(join(here, "system-prompt.md"), "utf8"),
   pipeline_mode: "full",
+  // Spoken as soon as the shopper joins, so Sasha never waits for a hello.
+  greeting:
+    "Hey, I'm Sasha, your AI stylist here at Men's Fashion Barn. Here's the deal: I get to know you, check out what you've got on, and then my styling agent builds you looks from our racks. What's your name?",
   default_face_id: "r347a65434bb", // Ruby, stock Phoenix-4.5 face
   layers: {
     perception: {
@@ -39,9 +42,9 @@ const pal = {
     },
     conversational_flow: {
       turn_detection_model: "sparrow-2",
-      turn_taking_patience: "low", // Quick to answer, to suit a fast talker.
-      pal_interruptibility: "high", // The shopper can cut in, as with a friend.
-      idle_engagement: "patient", // May break long silences, such as the style_outfit wait.
+      turn_taking_patience: "medium", // Low made her cut in and restart in noisy rooms.
+      pal_interruptibility: "medium", // High let room noise stop her mid-sentence.
+      idle_engagement: "eager", // Breaks silences quickly, such as the style_outfit wait.
     },
     tts: {
       voice_settings: { speed: 1.1 }, // Slightly fast. Range tops out at 1.2.
@@ -56,6 +59,7 @@ async function call(method, path, body) {
     body: JSON.stringify(body),
   });
   const text = await res.text();
+  if (res.status === 304) return {}; // Nothing changed.
   if (!res.ok) {
     console.error(`${method} ${path} failed with HTTP ${res.status}:\n${text}`);
     process.exit(1);
@@ -67,7 +71,7 @@ if (existsSync(idFile)) {
   const palId = readFileSync(idFile, "utf8").trim();
   // JSON Patch "add" replaces a value that already exists. Layers are patched one
   // at a time so anything else on the PAL, like the llm layer, is left alone.
-  const fields = ["pal_name", "system_prompt", "default_face_id"].map((field) => ({
+  const fields = ["pal_name", "system_prompt", "default_face_id", "greeting"].map((field) => ({
     op: "add",
     path: `/${field}`,
     value: pal[field],
