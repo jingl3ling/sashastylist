@@ -2,7 +2,7 @@
 // Contract: "Store API" in the team plan. Keep results small; avatar tool results must stay under 4 KB.
 // Loaded after app.js, so it can use app.js globals: P, L, byId, DEPTS, title, slug, filtersFrom, matches, sortProducts, CATALOG.
 (() => {
-  const BAG_KEY = "barn.bag", BAG_LIMIT = 10000;
+  const BAG_KEY = "barn.bag", BAG_LIMIT = 10000, LOOKS_KEY = "barn.looks";
   const loadBag = () => { try { return JSON.parse(localStorage.getItem(BAG_KEY)) || []; } catch { return []; } };
   const saveBag = (b) => { try { localStorage.setItem(BAG_KEY, JSON.stringify(b)); } catch {} };
   const brief = (p) => ({ id: p.id, title: title(p.title), brand: p.brand, price: p.simulated.price });
@@ -19,6 +19,9 @@
 
   const Barn = {
     ready: null,
+    // Survives a reload during the demo (this tab only).
+    lastLooks: (() => { try { return JSON.parse(sessionStorage.getItem(LOOKS_KEY)); } catch { return null; } })(),
+    prevLooks: null,
 
     // Sets the shop URL so the page filters live, and returns the top 5 matches in page order.
     // size: pass the shopper's size for the garment being searched (jacket "40R", shirt "15.5 / 32-33", waist "32", shoe "10").
@@ -94,11 +97,15 @@
       return { items, count: items.reduce((a, x) => a + x.qty, 0), total: Math.round(items.reduce((a, x) => a + x.qty * x.price, 0) * 100) / 100 };
     },
 
-    // Stub until the outfit board ships (checklist item 7). Keeps the result so the board can render it.
+    // Opens the outfit board (#/stylist, site/board.js) with the stylist's result. The previous result is kept so a rework can mark what changed.
     showLooks(result) {
+      if (!result?.looks?.length) return { ok: false, error: "No looks to show" };
+      Barn.prevLooks = Barn.lastLooks;
       Barn.lastLooks = result;
+      try { sessionStorage.setItem(LOOKS_KEY, JSON.stringify(result)); } catch {}
       dispatchEvent(new CustomEvent("barn:looks", { detail: result }));
-      return { ok: true, looks: result?.looks?.length ?? 0 };
+      if (location.hash === "#/stylist") stylistPage(); else location.hash = "#/stylist";
+      return { ok: true, looks: result.looks.length };
     },
 
     // One row per agent step. Same id again updates that row. status: "start" | "end" | "blocked".

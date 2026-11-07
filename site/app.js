@@ -187,6 +187,7 @@ function route() {
   if (parts[0] === "shop") { const key = [...q].filter(([k]) => k !== "sort").join("&"); if (key !== last) shown = PAGE; last = key; shop(q); }
   else if (parts[0] === "product") product(parts[1]);
   else if (parts[0] === "looks") parts[1] ? look(parts[1]) : looks();
+  else if (parts[0] === "stylist") stylistPage(); // outfit board, site/board.js
   else home();
   if (!q.has("sort")) scrollTo(0, 0);
   document.querySelectorAll(".nav-l a").forEach((a) => { const h = a.getAttribute("href"); const on = h === "#/shop?sale=1" ? q.has("sale") : h === "#/shop" ? parts[0] === "shop" && !q.has("sale") : parts[0] === "looks"; on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current"); });
