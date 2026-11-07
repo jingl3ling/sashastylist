@@ -4,6 +4,7 @@ import cors from 'cors'
 import { randomUUID } from 'node:crypto'
 import { RunRequest, SwapRequest } from '../contracts/index.mjs'
 import { swap } from './swap.js'
+import { withDepartment } from './gender.js'
 import { stubRun } from './stub.js'
 
 const MODE = process.env.STYLIST_MODE ?? 'stub'
@@ -100,7 +101,7 @@ app.post('/api/stylist/run', (req, res) => {
   const run_id = randomUUID()
   const run = { events: [], done: false, subs: new Set() }
   runs.set(run_id, run)
-  execute(run, parsed.data)
+  execute(run, withDepartment(parsed.data))
   res.status(202).json({ run_id })
 })
 

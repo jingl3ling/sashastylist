@@ -28,6 +28,8 @@ The brief may say "Department: men's" or "Department: women's". Style only from 
 Use the catalog's `gender` filter (`men` or `women`) when the tool has one, and when you filter the
 file, keep only rows whose `gender` matches.
 
+- If the Notes name a department ("women's", "men's"), that overrides the Department line, because the
+  shopper said it on this call. Style from the department the Notes name.
 - If the catalog rows have no `gender` field at all, the store is men's only: use men's.
 - If you still cannot tell, do not style anything. Reply with only this JSON in a ```json block:
   `{"needs_gender": true, "question": "Should I style from the men's or women's department?"}`
