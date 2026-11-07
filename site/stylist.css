@@ -12,6 +12,9 @@
 .stylist-video { position: relative; aspect-ratio: 4 / 3; background: var(--color-paper-3); display: grid; place-items: center; overflow: hidden; }
 .stylist-video > iframe, .stylist-video > video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .stylist-empty { margin: 0; padding: var(--space-md); text-align: center; color: var(--color-muted); font-size: var(--text-sm); }
+/* Soham's video box is dark (#111); the store's ink-on-paper .btn would vanish on it. */
+.avatar-ui .btn { color: var(--color-paper); border-color: var(--color-paper); background: oklch(100% 0 0 / 0.06); }
+.avatar-ui .btn:hover, .avatar-ui .btn:focus-visible { background: var(--color-paper); color: var(--color-ink); }
 
 .stylist-feed h3 { margin: 0 0 var(--space-xs); font-size: var(--text-xs); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-muted); }
 .stylist-feed ol { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2xs); font-size: var(--text-sm); }
