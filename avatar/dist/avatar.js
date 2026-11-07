@@ -6911,7 +6911,7 @@ function ku() {
     }
   };
 }
-const Su = "https://backend-production-6d9d.up.railway.app", Dn = new URLSearchParams(location.search), Nn = window.AVATAR_CONFIG ?? {}, Mu = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname), kt = (Dn.get("backend") ?? Nn.backend ?? (Mu ? "http://localhost:8787" : Su)).replace(/\/+$/, ""), Hs = Dn.get("avatar_instant") === "1" || Nn.instant === !0, xr = Dn.get("avatar_mode") ?? Nn.styleOutfitMode ?? "background", tt = () => window.Barn, Lt = [], Gs = ku(), fn = wu({
+const Su = "https://backend-production-6d9d.up.railway.app", Dn = new URLSearchParams(location.search), Nn = window.AVATAR_CONFIG ?? {}, Mu = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname), kt = (Dn.get("backend") ?? Nn.backend ?? (Mu ? "http://localhost:8787" : Su)).replace(/\/+$/, ""), Hs = Dn.get("avatar_instant") !== "0" && Nn.instant !== !1, xr = Dn.get("avatar_mode") ?? Nn.styleOutfitMode ?? "background", tt = () => window.Barn, Lt = [], Gs = ku(), fn = wu({
   say: (t) => {
     Oe && Cn({ message_type: "conversation", event_type: "conversation.respond", conversation_id: Oe, properties: { text: t } });
   },
