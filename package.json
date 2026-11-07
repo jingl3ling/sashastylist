@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --env-file=.env server/index.js",
+    "start": "node server/index.js",
     "dev": "STYLIST_MODE=stub node --env-file=.env server/index.js",
     "create-agent": "node --env-file=.env agent/create-agent.mjs",
     "sync-agent": "node --env-file=.env agent/sync-agent.mjs",
-    "smoke": "node --env-file=.env agent/smoke.mjs"
+    "smoke": "node --env-file=.env agent/smoke.mjs",
+    "start:local": "node --env-file=.env server/index.js"
   },
   "keywords": [],
   "author": "",
