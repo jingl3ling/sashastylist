@@ -12,6 +12,12 @@
 .stylist-video { position: relative; aspect-ratio: 4 / 3; background: var(--color-paper-3); display: grid; place-items: center; overflow: hidden; }
 .stylist-video > iframe, .stylist-video > video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .stylist-empty { margin: 0; padding: var(--space-md); text-align: center; color: var(--color-muted); font-size: var(--text-sm); }
+/* Before the call: Sasha's photo with the invitation over it. */
+.avatar-overlay.avatar-welcome { align-content: end; justify-items: center; gap: var(--space-sm) !important; padding: var(--space-md) !important; color: #fff !important; background: linear-gradient(to top, rgb(0 0 0 / 0.78), rgb(0 0 0 / 0.28) 42%, rgb(0 0 0 / 0) 68%), url("sasha.jpg") center 22% / cover no-repeat; }
+.avatar-welcome p { font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.2; text-wrap: balance; text-shadow: 0 1px 8px rgb(0 0 0 / 0.5); }
+.avatar-ui .avatar-welcome .btn { color: var(--color-ink); border-color: #fff; background: #fff; }
+.avatar-ui .avatar-welcome .btn:hover, .avatar-ui .avatar-welcome .btn:focus-visible { color: #fff; border-color: #fff; background: rgb(0 0 0 / 0.55); }
+
 /* Soham's video box is dark (#111); the store's ink-on-paper .btn would vanish on it. */
 .avatar-ui .btn { color: var(--color-paper); border-color: var(--color-paper); background: oklch(100% 0 0 / 0.06); }
 .avatar-ui .btn:hover, .avatar-ui .btn:focus-visible { background: var(--color-paper); color: var(--color-ink); }

@@ -223,12 +223,13 @@ function render(message?: string) {
     return;
   }
   overlay.hidden = false;
+  overlay.classList.toggle("avatar-welcome", state !== "live"); // Sasha's photo until her video is on
   overlay.replaceChildren();
   const p = document.createElement("p");
   p.style.margin = "0";
   p.textContent =
     message ??
-    ({ idle: "Talk to Sasha, your video stylist.", starting: "Connecting to Sasha…", ending: "Ending call…", error: "Couldn't connect.", live: "" } as const)[state];
+    ({ idle: "Talk to Sasha, your personal video stylist", starting: "Connecting to Sasha…", ending: "Ending call…", error: "Couldn't connect.", live: "" } as const)[state];
   overlay.append(p);
   if (state === "idle" || state === "error") {
     const b = document.createElement("button");

@@ -250,8 +250,8 @@ var ci, tn = { exports: {} }, yr = (function() {
     if (j === void 0) return !1;
     if (typeof j == "function") n(j, this, b);
     else {
-      var L = j.length, G = E(j, L);
-      for (_ = 0; _ < L; ++_) n(G[_], this, b);
+      var L = j.length, Y = E(j, L);
+      for (_ = 0; _ < L; ++_) n(Y[_], this, b);
     }
     return !0;
   }, i.prototype.addListener = function(m, b) {
@@ -2062,8 +2062,8 @@ function Va(t, e, n, r, i, s) {
         if (j) A[j[0]] = j[1];
         else {
           const L = _(x);
-          for (let G = L.length - 1; G >= 0; G--) {
-            const _e = L[G], we = _e && _e.filename, Ee = S[x];
+          for (let Y = L.length - 1; Y >= 0; Y--) {
+            const _e = L[Y], we = _e && _e.filename, Ee = S[x];
             if (we && Ee) {
               A[we] = Ee, sn[x] = [we, Ee];
               break;
@@ -2340,8 +2340,8 @@ class qa {
           if (_.spans && x) {
             const j = [];
             for (const L of _.spans) {
-              const G = x(L);
-              G ? j.push(G) : (Ia(), m.recordDroppedEvent("before_send", "span"));
+              const Y = x(L);
+              Y ? j.push(Y) : (Ia(), m.recordDroppedEvent("before_send", "span"));
             }
             _.spans = j;
           }
@@ -3260,14 +3260,14 @@ const Tc = () => ({ name: "BrowserSession", setupOnce() {
         const { stackParser: s, attachStacktrace: a } = co();
         if (ne() !== r || eo()) return;
         const { msg: c, url: l, line: p, column: g, error: v } = i, O = (function(E, w, m, b) {
-          const _ = E.exception = E.exception || {}, S = _.values = _.values || [], C = S[0] = S[0] || {}, A = C.stacktrace = C.stacktrace || {}, x = A.frames = A.frames || [], j = b, L = m, G = Le(w) && w.length > 0 ? w : (function() {
+          const _ = E.exception = E.exception || {}, S = _.values = _.values || [], C = S[0] = S[0] || {}, A = C.stacktrace = C.stacktrace || {}, x = A.frames = A.frames || [], j = b, L = m, Y = Le(w) && w.length > 0 ? w : (function() {
             try {
               return Yr.document.location.href;
             } catch {
               return "";
             }
           })();
-          return x.length === 0 && x.push({ colno: j, filename: G, function: et, in_app: !0, lineno: L }), E;
+          return x.length === 0 && x.push({ colno: j, filename: Y, function: et, in_app: !0, lineno: L }), E;
         })(Ir(s, v || c, void 0, a, !1), l, p, g);
         O.level = "error", Di(O, { originalException: v, mechanism: { handled: !1, type: "onerror" } });
       });
@@ -5012,7 +5012,7 @@ var Go = (function() {
     });
   }), function() {
     return _e.apply(this, arguments);
-  }) }, { key: "load", value: (G = F(function* (o) {
+  }) }, { key: "load", value: (Y = F(function* (o) {
     var d = this;
     if (this.needsLoad()) {
       if (this._destroyed && (this._logUseAfterDestroy(), this.strictMode)) throw new Error("Use after destroy");
@@ -5078,7 +5078,7 @@ var Go = (function() {
       });
     }
   }), function(o) {
-    return G.apply(this, arguments);
+    return Y.apply(this, arguments);
   }) }, { key: "join", value: (L = F(function* () {
     var o = this, d = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : {};
     if (this._testCallInProgress && this.stopTestCallQuality(), !d.url && !this.properties.url) {
@@ -6112,7 +6112,7 @@ var Go = (function() {
     var o = arguments.length > 0 && arguments[0] !== void 0 ? arguments[0] : void 0;
     return o ? Ke[o] : Object.values(Ke)[0];
   } }]);
-  var e, n, r, i, s, a, c, l, p, g, v, O, E, w, m, b, _, S, C, A, x, j, L, G, _e, we, Ee, dt, pt, ht, At, Yt, It, jt, Qt, H, ie, Lt, Kt;
+  var e, n, r, i, s, a, c, l, p, g, v, O, E, w, m, b, _, S, C, A, x, j, L, Y, _e, we, Ee, dt, pt, ht, At, Yt, It, jt, Qt, H, ie, Lt, Kt;
 })();
 function Yo(t) {
   if (t.extension) {
@@ -6673,9 +6673,9 @@ function Tu(t, e) {
         trims: [
           {
             label: "short titles",
-            apply: (L) => ({ ...L, products: L.products.map((G) => ({ ...G, title: Je(G.title, Dn) })) })
+            apply: (L) => ({ ...L, products: L.products.map((Y) => ({ ...Y, title: Je(Y.title, Dn) })) })
           },
-          { label: "drop brands", apply: (L) => ({ ...L, products: L.products.map(({ brand: G, ..._e }) => _e) }) },
+          { label: "drop brands", apply: (L) => ({ ...L, products: L.products.map(({ brand: Y, ..._e }) => _e) }) },
           ...na("products")
         ]
       };
@@ -6750,7 +6750,7 @@ function Tu(t, e) {
         return _("Looks are still being built. Don't call style_outfit again; tell the shopper it's still cooking.");
       const C = S.args, A = v(b, C.gender), x = C.budget_usd;
       if (!(x > 0)) return _("The budget has to be more than zero. Ask the shopper what they want to spend.");
-      const j = E(C.occasion), L = [...O].filter(([H]) => H !== j).reduce((H, [, ie]) => H + ie, 0), G = (await m.getBag())?.total ?? 0, _e = Ft(i - Math.max(G, L));
+      const j = E(C.occasion), L = [...O].filter(([H]) => H !== j).reduce((H, [, ie]) => H + ie, 0), Y = (await m.getBag())?.total ?? 0, _e = Ft(i - Math.max(Y, L));
       if (_e <= 0)
         return _(`The ${i} dollar limit for this conversation is used up by the earlier outfits and the bag. Tell the shopper no more looks this time.`);
       const we = Math.min(x, _e), Ee = b.conversationId || "no-conversation", dt = g.get(Ee), pt = !!(C.rework_slot && C.rework_feedback), ht = pt && dt?.presetLooks?.length ? dt.presetLooks : void 0, At = ht ? [Pu(ht, C.rework_slot, C.rework_feedback), C.notes].filter(Boolean).join(" ") : C.notes, Yt = {
@@ -6997,7 +6997,7 @@ const Ru = "https://backend-production-6d9d.up.railway.app", Wn = new URLSearchP
   },
   logger: (t) => console.log(`[avatar] ${t}`)
 });
-let Be, xe, Y = "idle";
+let Be, xe, G = "idle";
 const Gn = () => document.getElementById("avatar-slot");
 let Ne = [], St = (() => {
   try {
@@ -7021,9 +7021,9 @@ function Vu() {
 }
 function qr() {
   const t = Gn()?.querySelector(".avatar-ui"), e = t?.querySelector(".avatar-cc"), n = t?.querySelector(".avatar-cc-toggle");
-  if (n && (n.hidden = Y !== "live", n.setAttribute("aria-pressed", String(St)), n.style.opacity = St ? "1" : "0.5"), e) {
+  if (n && (n.hidden = G !== "live", n.setAttribute("aria-pressed", String(St)), n.style.opacity = St ? "1" : "0.5"), e) {
     const a = Ne.slice(-2);
-    e.hidden = !St || Y !== "live" || a.length === 0, e.replaceChildren(
+    e.hidden = !St || G !== "live" || a.length === 0, e.replaceChildren(
       ...a.map((c) => {
         const l = document.createElement("div"), p = document.createElement("b");
         return p.textContent = `${c.speaker}: `, p.style.color = c.speaker === "Sasha" ? "#ffd479" : "#9fd3ff", l.append(p, document.createTextNode(c.text)), l;
@@ -7068,15 +7068,15 @@ function Gt(t) {
     qr();
   }, e.append(n)), qr();
   const r = n.querySelector(".avatar-overlay"), i = n.querySelector(".avatar-end");
-  if (i.hidden = Y !== "live", Y === "live" && !t) {
+  if (i.hidden = G !== "live", G === "live" && !t) {
     r.hidden = !0;
     return;
   }
-  r.hidden = !1, r.replaceChildren();
+  r.hidden = !1, r.classList.toggle("avatar-welcome", G !== "live"), r.replaceChildren();
   const s = document.createElement("p");
-  if (s.style.margin = "0", s.textContent = t ?? { idle: "Talk to Sasha, your video stylist.", starting: "Connecting to Sasha…", ending: "Ending call…", error: "Couldn't connect.", live: "" }[Y], r.append(s), Y === "idle" || Y === "error") {
+  if (s.style.margin = "0", s.textContent = t ?? { idle: "Talk to Sasha, your personal video stylist", starting: "Connecting to Sasha…", ending: "Ending call…", error: "Couldn't connect.", live: "" }[G], r.append(s), G === "idle" || G === "error") {
     const a = document.createElement("button");
-    a.className = "btn", a.type = "button", a.textContent = Y === "error" ? "Try again" : "Start video call", a.onclick = () => {
+    a.className = "btn", a.type = "button", a.textContent = G === "error" ? "Try again" : "Start video call", a.onclick = () => {
       sa();
     }, r.append(a);
   }
@@ -7091,10 +7091,10 @@ function yt() {
   s && c?.id !== s.id && (r.srcObject = new MediaStream([s])), !s && c && (r.srcObject = null);
   const l = i.srcObject?.getAudioTracks()[0];
   a && l?.id !== a.id && (i.srcObject = new MediaStream([a]), i.play().catch(() => {
-  })), !a && l && (i.srcObject = null), Y === "live" && Gt(e ? void 0 : "Waiting for Sasha to join…");
+  })), !a && l && (i.srcObject = null), G === "live" && Gt(e ? void 0 : "Waiting for Sasha to join…");
 }
 function Fn(t) {
-  if (!(!Be || Y !== "live"))
+  if (!(!Be || G !== "live"))
     try {
       Be.sendAppMessage(t, "*");
     } catch (e) {
@@ -7108,8 +7108,8 @@ async function Ju(t) {
   e && Fn(e);
 }
 async function sa() {
-  if (!(Y === "starting" || Y === "live")) {
-    Y = "starting", Ne = [], Gt();
+  if (!(G === "starting" || G === "live")) {
+    G = "starting", Ne = [], Gt();
     try {
       await it()?.ready;
       const t = await fetch(`${Pt}/api/conversation`, { method: "POST", headers: { "content-type": "application/json" }, body: "{}" }), e = await t.json().catch(() => ({}));
@@ -7118,7 +7118,7 @@ async function sa() {
         Cn("Call ended.");
       }).on("error", (n) => {
         Cn(`Call error: ${n?.errorMsg ?? "unknown"}`, !0);
-      }), await Be.join({ url: e.conversation_url }), Y = "live", yt();
+      }), await Be.join({ url: e.conversation_url }), G = "live", yt();
     } catch (t) {
       console.error("[avatar] start failed", t), await Cn(`Couldn't start the call: ${t.message}. You can still type to the stylist below.`, !0);
     }
@@ -7136,11 +7136,11 @@ async function Cn(t, e = !1) {
     } catch {
     }
   }
-  Y = e ? "error" : "idle", Gt(t);
+  G = e ? "error" : "idle", Gt(t);
 }
 async function aa() {
-  if (Y !== "live") return;
-  Y = "ending", Gt();
+  if (G !== "live") return;
+  G = "ending", Gt();
   const t = xe;
   xe = void 0, t && fetch(`${Pt}/api/conversation/end`, {
     method: "POST",
@@ -7159,7 +7159,7 @@ let qu = 0;
 addEventListener("barn:brief", async (t) => {
   const e = String(t.detail?.text ?? "").trim();
   if (!e) return;
-  if (Y === "live" && xe) {
+  if (G === "live" && xe) {
     Fn({ message_type: "conversation", event_type: "conversation.respond", conversation_id: xe, properties: { text: e } });
     return;
   }
@@ -7188,7 +7188,7 @@ function is() {
   Gt(), window.Avatar = { router: Nn, start: sa, end: aa, log: Vt, backend: Pt, mode: Jr, caption: oa, rawUtterances: En, get captions() {
     return Ne;
   }, get state() {
-    return Y;
+    return G;
   } }, Wn.has("avatar_debug") && yu(Nn, Vt), console.log(`[avatar] ready: backend ${Pt}, style_outfit ${Jr}${ra ? ", instant presets ON" : ""}`);
 }
 document.readyState === "loading" ? addEventListener("DOMContentLoaded", is, { once: !0 }) : is();
