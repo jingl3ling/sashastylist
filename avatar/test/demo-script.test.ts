@@ -30,7 +30,9 @@ function success(r: ToolResultMessage | null): any {
 describe("pal/demo-script.md", () => {
   it("still names the ids, sizes and phrases this test relies on", () => {
     for (const s of ["MW-0374", "40R", "tuxedo outfit", "linen suit", "$1,500", "too formal"]) assert.ok(SCRIPT.includes(s), s);
-    assert.deepEqual(SHOPPER, { shopper_id: "demo-shopper", gender: "men" });
+    // No name, sizes or closet: every call starts clean. A department default is optional (Jing's fix drops it).
+    assert.equal(SHOPPER.shopper_id, "demo-shopper");
+    for (const k of ["name", "sizes", "closet"]) assert.ok(!(k in SHOPPER), `demo-shopper.json should not carry ${k}`);
   });
 
   it("runs steps 2–10 end to end", async () => {

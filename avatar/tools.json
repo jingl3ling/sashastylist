@@ -11,7 +11,7 @@
             "men",
             "women"
           ],
-          "description": "Which department to search: 'men' or 'women'. Always pass it once you know it; without it results mix both departments. Never decide it from the camera."
+          "description": "Which department to search: 'men' or 'women'. Always pass it once you know it; without it results mix both departments. Say which department you're starting with so the shopper can correct you, and switch right away if they do."
         },
         "query": {
           "type": "string",
@@ -139,7 +139,7 @@
             "men",
             "women"
           ],
-          "description": "Which department to style from: 'men' or 'women', as the shopper said it. Never decide it from the camera. If you don't know, leave it out: the result will then ask you to check with the shopper, and you call again with it."
+          "description": "Which department to style from: 'men' or 'women'. Pass it every time once known, and switch right away if the shopper corrects you. If you truly don't know, leave it out: the result will then ask you to check with the shopper, and you call again with it."
         }
       },
       "required": [
