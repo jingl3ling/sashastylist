@@ -37,3 +37,13 @@
   transition: transform var(--dur-short) var(--ease-out), opacity var(--dur-short) var(--ease-out); pointer-events: none; max-width: calc(100% - 2 * var(--space-md)); }
 .bag-toast[data-show] { transform: translate(-50%, 0); opacity: 1; }
 @media (min-width: 75rem) { .bag-toast { left: calc(50% - var(--stylist-w) / 2); } }
+/* While the bag is open, show the toast at the top so it never covers Check out. */
+.bag:not([hidden]) ~ .bag-toast { bottom: auto; top: var(--space-lg); transform: translate(-50%, -150%); }
+.bag:not([hidden]) ~ .bag-toast[data-show] { transform: translate(-50%, 0); }
+
+/* Phones: styles.css gives the header's right side 120px; with the Bag button it needs a little more,
+   and the search box shrinks so it never runs into the store name. */
+@media (max-width: 40rem) {
+  .nav-r { width: auto; gap: var(--space-sm); }
+  .nav-search { flex: 0 1 96px; width: 96px; }
+}

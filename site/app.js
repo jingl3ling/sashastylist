@@ -30,7 +30,8 @@ let P = [], L = [], byId = {}, shown = PAGE;
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 // Mike's site now serves every photo as .webp (same folders and names); our catalog still lists .png/.jpg.
 const img = (p, i = 0) => IMG + p.images[Math.min(i, p.images.length - 1)].replace(/\.(png|jpe?g)$/i, ".webp");
-const money = (n) => "$" + (Number.isInteger(n) ? n : n.toFixed(2));
+// "$1,453" and "$740.50": thousands separators, cents only when there are cents.
+const money = (n) => "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: Number.isInteger(n) ? 0 : 2, maximumFractionDigits: 2 });
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const deptOf = (p) => Object.keys(DEPTS).find((d) => DEPTS[d].includes(p.category));
 function title(t) {

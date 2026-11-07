@@ -9,10 +9,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=sentient@300,400&display=swap">
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="stylist.css">
-<link rel="stylesheet" href="bag.css">
-<link rel="stylesheet" href="board.css">
+<!-- Our CSS and JS load with ?v=<current minute>, so a browser never runs code more than about a minute old.
+     GitHub Pages lets browsers cache files for 10 minutes, which kept serving stale code after merges. -->
+<script>
+  window.ASSET_V = Math.floor(Date.now() / 60000);
+  ["styles.css", "stylist.css", "bag.css", "board.css"].forEach(function (f) { document.write('<link rel="stylesheet" href="' + f + "?v=" + window.ASSET_V + '">'); });
+</script>
+<noscript><link rel="stylesheet" href="styles.css"></noscript>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -73,11 +76,10 @@
   </div>
 </aside>
 <div class="bag-toast" id="bag-toast" role="status" aria-live="polite"></div>
-<script src="app.js"></script>
-<script src="barn.js"></script>
-<script src="bag.js"></script>
-<script src="board.js"></script>
-<!-- Soham's avatar layer (built file, committed under avatar/dist/). -->
-<script type="module" src="../avatar/dist/avatar.js"></script>
+<!-- Same order as before: app.js, barn.js, bag.js, board.js, then Soham's avatar layer (built file, committed under avatar/dist/). -->
+<script>
+  ["app.js", "barn.js", "bag.js", "board.js"].forEach(function (f) { document.write('<script src="' + f + "?v=" + window.ASSET_V + '"><\/script>'); });
+  document.write('<script type="module" src="../avatar/dist/avatar.js?v=' + window.ASSET_V + '"><\/script>');
+</script>
 </body>
 </html>
