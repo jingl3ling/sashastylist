@@ -19,10 +19,10 @@ export function waitTalkText(step: string | undefined): string {
 }
 
 export function createWaitTalk(opts: WaitTalkOptions) {
-  const firstMs = opts.firstMs ?? 10_000;
-  const everyMs = opts.everyMs ?? 15_000;
-  const maxUpdates = opts.maxUpdates ?? 4;
-  const quietNeededMs = opts.quietNeededMs ?? 2_500;
+  const firstMs = opts.firstMs ?? 8_000;
+  const everyMs = opts.everyMs ?? 10_000;
+  const maxUpdates = opts.maxUpdates ?? 8;
+  const quietNeededMs = opts.quietNeededMs ?? 2_000;
   let running = false;
   let nextAt = 0;
   let sent = 0;

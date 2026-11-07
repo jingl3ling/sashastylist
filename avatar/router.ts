@@ -404,7 +404,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         output: {
           started: true,
           ...capNote,
-          note: "The stylist is building three looks; it takes about a minute and the shopper can watch the steps on screen. Keep chatting. The looks arrive as a new message; don't call style_outfit again.",
+          note: "The stylist is working on this request and it takes about a minute. Keep telling short stories and jokes. The looks arrive in a new message starting with STYLIST RESULT. After that, call style_outfit again for any new request.",
         },
       };
     },
