@@ -1,4 +1,4 @@
-// Outfit board at #/stylist: up to three looks with photos, reasons, totals, and closet pieces marked as owned.
+// Outfit board at #/stylist: up to three looks, each a photo collage on top with the piece details below.
 // Barn.showLooks(result) stores the result and opens this page; app.js routes #/stylist to stylistPage().
 (() => {
   const key = (i) => i.product_id || "closet:" + (i.closet_item || "");
@@ -25,9 +25,39 @@
       <a class="board-title" href="#/product/${p.id}">${esc(title(p.title))}</a><div class="card-brand">${esc(p.brand)}</div><p class="board-why">${esc(it.why)}</p></div></li>`;
   }
 
+  // Flat-lay collage: the biggest layer leads, and smaller pieces sit around it.
+  const SPOTS = [
+    { l: 4, t: 4, w: 54, h: 62 },
+    { l: 56, t: 5, w: 40, h: 44 },
+    { l: 54, t: 47, w: 42, h: 49 },
+    { l: 6, t: 66, w: 40, h: 30 },
+    { l: 40, t: 68, w: 18, h: 26 },
+    { l: 40, t: 3, w: 18, h: 22 },
+  ];
+  const RANK = [/tux|suit|coat|blazer|jacket|outerwear/i, /shirt|polo|tee|sweater|knit|hoodie/i, /trouser|pant|chino|short|denim|jean|swim/i, /shoe|footwear|loafer|sneaker|boot|sandal/i];
+  const rank = (it) => {
+    const p = byId[it.product_id];
+    const text = [it.slot, p?.category, p?.subcategory].join(" ");
+    const r = RANK.findIndex((x) => x.test(text));
+    return r < 0 ? RANK.length : r;
+  };
+
+  function collage(look, li) {
+    const items = [...look.items].sort((a, b) => rank(a) - rank(b)).slice(0, SPOTS.length);
+    const tiles = items.map((it, n) => {
+      const s = SPOTS[n], pos = `left:${s.l}%;top:${s.t}%;width:${s.w}%;height:${s.h}%`;
+      const fresh = swappedIn(li, look, it) ? " is-new" : "";
+      const p = byId[it.product_id];
+      if (p) return `<a class="collage-piece${fresh}" style="${pos}" href="#/product/${p.id}" aria-label="${esc(title(p.title))}"><img src="${img(p)}" alt="" loading="lazy"></a>`;
+      return `<div class="collage-piece collage-owned${fresh}" style="${pos}"><span>${esc(it.closet_item || it.slot)}</span><small>Already yours</small></div>`;
+    });
+    return `<div class="board-collage">${tiles.join("")}</div>`;
+  }
+
   function lookCard(look, li) {
     const owned = look.items.filter((i) => i.closet_item).length;
     return `<article class="board-look"><header class="board-look-head"><h2>${esc(look.outfit_name)}</h2><div class="board-total">${money(Math.round(look.total_usd * 100) / 100)}</div></header>
+      ${collage(look, li)}
       ${owned ? `<p class="board-owned-note">${owned} ${owned === 1 ? "piece" : "pieces"} from your closet</p>` : ""}
       <ol class="board-items">${look.items.map((it) => itemRow(look, li, it)).join("")}</ol></article>`;
   }
