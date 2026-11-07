@@ -221,13 +221,26 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       const g = department(ctx, a.gender);
       if (g) filters.gender = g;
       if (a.on_sale) filters.sale = true;
-      const results = (await barn.search(filters)) ?? [];
+      let results = (await barn.search({ ...filters })) ?? [];
+      // Nothing matched every filter (e.g. Suits + Casual): drop the softest filters one at a time,
+      // keeping the query, price, size and department gender, so the page never sits empty.
+      const loosened: string[] = [];
+      for (const k of ["style", "color", "dept"] as const) {
+        if (results.length > 0) break;
+        if (filters[k] === undefined) continue;
+        loosened.push(`${k === "dept" ? "department" : k} ${filters[k]}`);
+        delete filters[k];
+        results = (await barn.search({ ...filters })) ?? [];
+      }
       for (const p of results) prices.set(p.id, p.price);
       return {
         status: "success",
         output: {
           products: results.map((p) => ({ id: p.id, title: p.title, brand: p.brand, price: p.price })),
-          ...(results.length === 0 ? { hint: "No matches. Suggest loosening one filter." } : {}),
+          ...(loosened.length && results.length
+            ? { note: `Nothing matched every filter, so I dropped ${loosened.join(" and ")}. Mention it briefly.` }
+            : {}),
+          ...(results.length === 0 ? { hint: "No matches. Try a simpler garment word." } : {}),
         },
         trims: [
           {

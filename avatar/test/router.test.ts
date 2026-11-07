@@ -89,11 +89,22 @@ describe("search_products", () => {
     assert.deepEqual(calls.at(-1), ["search", [{ q: "suit" }]]);
   });
 
+  it("drops style, then color, then department when nothing matches, and says so", async () => {
+    const { router, barn, calls } = setup();
+    const real = barn.search.bind(barn);
+    barn.search = (f) => (f.style || f.color ? [] : real(f));
+    const r = await router.handle(call("search_products", { query: "suit", department: "Suits & tuxedos", style: "Casual", color: "teal", gender: "men" }));
+    ok(r);
+    assert.ok(out(r).products.length > 0);
+    assert.match(out(r).note, /dropped style Casual and color teal/);
+    assert.deepEqual(calls, [["search", [{ q: "suit", dept: "Suits & tuxedos", gender: "men" }]]], "the retry keeps query, department and gender");
+  });
+
   it("hints when nothing matches", async () => {
     const { router } = setup();
     const r = await router.handle(call("search_products", { query: "zzzz" }));
     ok(r);
-    assert.match(out(r).hint, /loosening/);
+    assert.match(out(r).hint, /simpler garment word/);
   });
 
   it("trims an oversized result below the threshold", async () => {
