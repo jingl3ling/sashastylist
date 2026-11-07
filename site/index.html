@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=sentient@300,400&display=swap">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="stylist.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -42,6 +43,21 @@
     </div>
   </div>
 </footer>
+<button class="btn stylist-toggle" id="stylist-toggle" aria-controls="stylist" aria-expanded="false">Stylist</button>
+<aside class="stylist" id="stylist" aria-label="Personal stylist">
+  <div class="stylist-head"><h2>Your stylist</h2><button class="stylist-close" id="stylist-close" type="button">Close</button></div>
+  <!-- Soham: the Tavus video call mounts here. -->
+  <div id="avatar-slot" class="stylist-video"><p class="stylist-empty">Your video stylist will appear here.</p></div>
+  <!-- Barn.addFeedStep() fills this as the ZooWork agent works. -->
+  <section class="stylist-feed" aria-label="What the stylist is doing" hidden><h3>Working on it</h3><ol id="feed-slot" aria-live="polite"></ol></section>
+  <!-- Text fallback: submitting fires a "barn:brief" event with { text }. -->
+  <form class="stylist-form" id="stylist-form">
+    <label class="visually-hidden" for="stylist-input">Tell the stylist what you need</label>
+    <input id="stylist-input" type="text" placeholder="Or type: summer wedding in Italy, about $800" autocomplete="off">
+    <button class="btn" type="submit">Send</button>
+  </form>
+</aside>
 <script src="app.js"></script>
+<script src="barn.js"></script>
 </body>
 </html>

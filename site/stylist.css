@@ -1,0 +1,35 @@
+/* Stylist panel: a fixed right column on wide screens, a slide-over sheet on narrow ones. */
+:root { --stylist-w: 360px; }
+
+.stylist { position: fixed; inset: 0 0 0 auto; width: min(100%, var(--stylist-w)); z-index: var(--z-modal); display: flex; flex-direction: column; gap: var(--space-md);
+  padding: var(--space-md); box-sizing: border-box; background: var(--color-card); border-left: var(--rule-hair) solid var(--color-rule); overflow-y: auto;
+  transform: translateX(100%); transition: transform var(--dur-short) var(--ease-out); }
+.stylist[data-open] { transform: none; box-shadow: var(--shadow-card); }
+.stylist-head { display: flex; align-items: baseline; justify-content: space-between; }
+.stylist-head h2 { margin: 0; font-family: var(--font-display); font-weight: var(--serif-small); font-size: var(--text-lg); }
+.stylist-close { border: 0; background: none; color: var(--color-muted); font: inherit; font-size: var(--text-sm); cursor: pointer; text-decoration: underline; }
+
+.stylist-video { position: relative; aspect-ratio: 4 / 3; background: var(--color-paper-3); display: grid; place-items: center; overflow: hidden; }
+.stylist-video > iframe, .stylist-video > video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.stylist-empty { margin: 0; padding: var(--space-md); text-align: center; color: var(--color-muted); font-size: var(--text-sm); }
+
+.stylist-feed h3 { margin: 0 0 var(--space-xs); font-size: var(--text-xs); font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-muted); }
+.stylist-feed ol { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2xs); font-size: var(--text-sm); }
+.stylist-feed li { display: grid; grid-template-columns: 1.25em 1fr; gap: var(--space-xs); color: var(--color-ink-2); }
+.stylist-feed li::before { content: "…"; color: var(--color-muted); }
+.stylist-feed li[data-status="end"]::before { content: "✓"; color: var(--color-success); }
+.stylist-feed li[data-status="blocked"]::before { content: "!"; color: var(--color-error); font-weight: 500; }
+
+.stylist-form { margin-top: auto; display: flex; gap: var(--space-xs); align-items: end; }
+.stylist-form input { flex: 1; min-width: 0; border: 0; border-bottom: var(--rule-hair) solid var(--color-rule); background: transparent; color: var(--color-ink);
+  padding: var(--space-xs) 0; font: inherit; font-size: var(--text-sm); border-radius: 0; }
+.stylist-form input::placeholder { color: var(--color-muted); }
+
+.stylist-toggle { position: fixed; right: var(--space-md); bottom: var(--space-md); z-index: var(--z-sticky); }
+
+/* Wide screens: the panel is always visible and the store makes room for it. */
+@media (min-width: 75rem) {
+  body { padding-right: var(--stylist-w); }
+  .stylist { transform: none; box-shadow: none; }
+  .stylist-toggle, .stylist-close { display: none; }
+}
