@@ -1,0 +1,141 @@
+[
+  {
+    "name": "search_products",
+    "description": "Search the Men's Fashion Barn catalog and filter the product grid the shopper is looking at. Call it for any browsing request, and right after the shopper describes an event so the page starts moving. Fill in only the filters the shopper's words support. max_price is a per-item limit, never an outfit budget. Returns up to 5 matches (id, title, brand, price); name two at most, the rest are on screen.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Garment words matched against product names only, e.g. 'linen suit', 'loafers', 'oxford shirt'. Never put the occasion or place here ('wedding', 'Italy', 'beach'): that matches nothing. Use department, style and color for the rest."
+        },
+        "department": {
+          "type": "string",
+          "description": "One of: 'Suits & tuxedos', 'Shirts & tees', 'Knits & sweats', 'Trousers & denim', 'Shorts & swim', 'Outerwear', 'Shoes', 'Ties & formal extras', 'Accessories'. Loose names like 'suits' or 'shoes' also work."
+        },
+        "style": {
+          "type": "string",
+          "description": "One of: 'Formal', 'Business Casual', 'Casual', 'Streetwear', 'Athletic'."
+        },
+        "brand": {
+          "type": "string",
+          "description": "Brand name, only if the shopper named one."
+        },
+        "color": {
+          "type": "string",
+          "description": "Colour, e.g. 'navy'."
+        },
+        "max_price": {
+          "type": "number",
+          "description": "Maximum price per item in US dollars."
+        },
+        "size": {
+          "type": "string",
+          "description": "The shopper's size for the garment being searched, to show only items in stock in that size: jacket '40R', shirt '15.5 / 32-33', waist '32', shoe '10'."
+        },
+        "on_sale": {
+          "type": "boolean",
+          "description": "true to show only items on sale."
+        }
+      },
+      "required": []
+    },
+    "origin": "llm",
+    "on_call": "generate_filler",
+    "on_resolve": "generate_response",
+    "delivery": {
+      "app_message": true
+    }
+  },
+  {
+    "name": "show_product",
+    "description": "Open one product's page on the shopper's screen. Use a product_id exactly as search_products or style_outfit returned it; never guess or build an id. Returns title, brand, price, sizes in stock and colours.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "string",
+          "description": "Exact id from a tool result, e.g. 'MW-0001'."
+        }
+      },
+      "required": [
+        "product_id"
+      ]
+    },
+    "origin": "llm",
+    "on_call": "silent",
+    "on_resolve": "generate_response",
+    "delivery": {
+      "app_message": true
+    }
+  },
+  {
+    "name": "add_to_bag",
+    "description": "Add one product to the shopper's bag. ONLY call this after the shopper has said yes out loud, in this conversation, to adding this exact item in this size (and colour, if it comes in more than one). Interest is not a yes. Never add closet items. The bag has a hard limit of 10,000 dollars per conversation, enforced here. Returns the bag count and total, or a short reason it failed (size out of stock, over the limit).",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "product_id": {
+          "type": "string",
+          "description": "Exact id of the confirmed product."
+        },
+        "size": {
+          "type": "string",
+          "description": "Confirmed size as the product lists it, e.g. '40R', 'M', '10'. Omit only for one-size items."
+        },
+        "color": {
+          "type": "string",
+          "description": "Confirmed colour, if the item comes in more than one."
+        }
+      },
+      "required": [
+        "product_id"
+      ]
+    },
+    "origin": "llm",
+    "on_call": "silent",
+    "on_resolve": "generate_response",
+    "delivery": {
+      "app_message": true
+    }
+  },
+  {
+    "name": "style_outfit",
+    "description": "Hand the brief to the styling agent, which builds three complete looks from the catalog and the shopper's closet and puts them on the outfit board. You need the event and the budget first. It is SLOW (about a minute) and the shopper can watch each step on screen. Usually this returns at once with started: true. Then keep the shopper company, never predict the result, and never call it again; the looks arrive in a later message marked [Stylist result]. When the looks arrive (or if this returns them directly), say spoken_summary in your own voice and ask which look the shopper likes. To change one piece of the looks, call it again with the same occasion and budget plus rework_slot and rework_feedback.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "occasion": {
+          "type": "string",
+          "description": "The event, e.g. 'summer wedding in Italy'."
+        },
+        "budget_usd": {
+          "type": "number",
+          "description": "Total budget for this outfit in US dollars, as the shopper said it. The 10,000 dollar limit covers all outfits and the bag in this conversation; the result says if the budget was capped."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Everything useful: dress code, season, location, colours, likes and dislikes, closet items to reuse, or that this is a second, separate outfit."
+        },
+        "rework_slot": {
+          "type": "string",
+          "description": "Only when changing one piece: the slot to change, e.g. 'Shoes'."
+        },
+        "rework_feedback": {
+          "type": "string",
+          "description": "Only when changing one piece: what's wrong with it, e.g. 'too formal'."
+        }
+      },
+      "required": [
+        "occasion",
+        "budget_usd"
+      ]
+    },
+    "origin": "llm",
+    "on_call": "generate_filler",
+    "on_resolve": "generate_response",
+    "delivery": {
+      "app_message": true
+    }
+  }
+]
