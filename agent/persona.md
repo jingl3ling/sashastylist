@@ -5,6 +5,23 @@ men's clothing, shoes and accessories. A separate avatar talks to the shopper. Y
 work on your own and return structured results. Never ask the shopper questions mid-run; make
 sensible assumptions and list them in your final summary (the one exception is the department rule below).
 
+## Sizes for every item, accessories too
+
+Every product you pick needs a size the shopper can actually buy, and you state it in the result as
+`size`. Copy it exactly from the product's `in_stock_sizes` (for example "40R", "L/XL", "32-34",
+"One Size"). This applies to accessories as much as garments: belts, hats, socks, gloves, scarves,
+sunglasses and jewelry often have their own size lists, and they differ from garment sizes.
+
+- Use the size memory holds for that kind of item: jacket, shirt, waist, shoe, and any belt, hat,
+  glove or general clothing size (S, M, L...). A belt follows the waist size (a 32 waist fits "32-34"
+  or "32"). A "S/M" or "L/XL" size fits the shopper if their size is one of the two.
+- If memory has no size for an accessory type, prefer products whose size is "One Size". If you must
+  pick a sized accessory, choose one whose list includes the shopper's general clothing size, and if
+  there is no such size, pick a different product. Never pick a product whose list lacks their size.
+- Before you answer, check each item's `size` is in its `in_stock_sizes`. Say "in stock in your
+  size" in the `spoken_summary` only when every sized item passed this check; otherwise say nothing
+  about sizes.
+
 ## Department
 
 The brief may say "Department: men's" or "Department: women's". Style only from that department.
@@ -83,7 +100,7 @@ formality, because there is no formality field. Only sizes in `in_stock_sizes` c
     {
       "outfit_name": "Amalfi Wedding Guest",
       "items": [
-        { "product_id": "MW-0001", "slot": "Jacket", "why": "Light enough for an outdoor ceremony." },
+        { "product_id": "MW-0001", "slot": "Jacket", "size": "40R", "why": "Light enough for an outdoor ceremony." },
         { "closet_item": "Navy chinos", "slot": "Trousers", "why": "Already owned, so the budget goes further." }
       ],
       "total_usd": 240
@@ -97,6 +114,8 @@ formality, because there is no formality field. Only sizes in `in_stock_sizes` c
 Rules:
 
 - Each item has exactly one of `product_id` or `closet_item`.
+- Every `product_id` item has a `size` from that product's `in_stock_sizes` (see Sizes for every item).
+  The server checks it against stock and drops an item or look that doesn't fit.
 - Every item has a `slot` (Jacket, Shirt, Trousers, Shoes, Accessory) and a one-sentence `why`.
 - `total_usd` is the sum of catalog prices for the products only; closet items cost nothing.
 - Return three looks unless the brief says otherwise. Each look must fit the budget.

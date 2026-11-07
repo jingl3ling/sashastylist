@@ -1,7 +1,7 @@
 // Swap one item in a look without running the agent. Owner: Jing.
 // Pure functions over the catalog: same department and category, in stock, and inside the
 // budget the rest of the look leaves. Use the agent rework for vague feedback like "too formal".
-import { catalog } from './validate.js'
+import { catalog, matchSize } from './validate.js'
 
 const dept = (p) => p.gender ?? 'men' // a catalog without a gender field is men's only
 const inStock = (p) => Object.values(p.simulated?.inventory ?? {}).some((n) => n > 0)
@@ -28,14 +28,20 @@ function locate(look, { slot, index }) {
 }
 
 // Candidates for the slot, best first. `limit` is applied by the caller.
-function candidates(look, original, { budget, gender }) {
+// The size label to buy in `p` for a shopper size, or null if none is in stock.
+function sizeFor(p, size) {
+  if (!size) return undefined // no size given: don't filter
+  return matchSize(size, p.sizes ?? [], p.simulated?.inventory)
+}
+
+function candidates(look, original, { budget, gender, size }) {
   const department = gender ?? dept(original)
   const others = look.items.filter((it) => it.product_id && it.product_id !== original.id)
   const otherTotal = others.reduce((sum, it) => sum + (catalog.get(it.product_id)?.simulated.price ?? 0), 0)
   const maxPrice = budget ? budget - otherTotal : Infinity
   const inLook = new Set(look.items.map((it) => it.product_id))
   const pool = [...catalog.values()].filter(
-    (p) => dept(p) === department && p.category === original.category && !inLook.has(p.id) && inStock(p) && p.simulated.price <= maxPrice,
+    (p) => dept(p) === department && p.category === original.category && !inLook.has(p.id) && inStock(p) && p.simulated.price <= maxPrice && sizeFor(p, size) !== null,
   )
   // Prefer the same subcategory (loafer for loafer) when there are enough of them.
   const sameSub = pool.filter((p) => p.subcategory === original.subcategory)
@@ -54,7 +60,7 @@ export function swap(req) {
   const found = locate(req.look, req)
   if (found.error) return { ok: false, error: found.error }
   const { i, item, original } = found
-  const list = candidates(req.look, original, { budget: req.budget_usd, gender: req.gender })
+  const list = candidates(req.look, original, { budget: req.budget_usd, gender: req.gender, size: req.size })
   const base = original.simulated.price
 
   if (!req.product_id) {
@@ -69,7 +75,14 @@ export function swap(req) {
   const chosen = list.find((p) => p.id === req.product_id)
   if (!chosen) return { ok: false, error: `${req.product_id} cannot replace the ${item.slot}: wrong department or category, out of stock, or over budget` }
   const items = req.look.items.map((it, n) =>
-    n === i ? { product_id: chosen.id, slot: item.slot, why: `Swapped in ${chosen.title} instead of ${original.title}.` } : it,
+    n === i
+      ? {
+          product_id: chosen.id,
+          slot: item.slot,
+          ...(req.size ? { size: sizeFor(chosen, req.size) } : {}),
+          why: `Swapped in ${chosen.title} instead of ${original.title}.`,
+        }
+      : it,
   )
   const total = items.reduce((sum, it) => sum + (it.product_id ? catalog.get(it.product_id).simulated.price : 0), 0)
   return { ok: true, look: { ...req.look, items, total_usd: round(total) } }

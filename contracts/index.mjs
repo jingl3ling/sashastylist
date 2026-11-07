@@ -37,6 +37,9 @@ export const LookItem = z
     closet_item: z.string().optional(),
     slot: z.string(),
     why: z.string(),
+    // The size to buy, taken from the product's own size list ("40R", "L/XL", "One Size").
+    // Optional on closet items. The backend checks it against stock and drops items that don't fit.
+    size: z.string().optional(),
   })
   .refine((i) => Boolean(i.product_id) !== Boolean(i.closet_item), {
     message: 'exactly one of product_id or closet_item',
@@ -75,6 +78,7 @@ export const SwapRequest = z
     product_id: z.string().optional(), // chosen replacement: apply the swap
     budget_usd: z.number().positive().optional(),
     gender: z.enum(['men', 'women']).optional(),
+    size: z.string().optional(), // the shopper's size for this item; alternatives must come in it
     limit: z.number().int().min(1).max(10).optional(), // alternatives to return, default 5
   })
   .refine((r) => r.slot !== undefined || r.index !== undefined, { message: 'send slot or index' })

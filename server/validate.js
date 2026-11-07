@@ -12,10 +12,47 @@ function loadCatalog() {
 }
 export const catalog = loadCatalog()
 
-// Drops unknown product_ids and over-budget looks, and recomputes totals from catalog prices.
+const norm = (s) => String(s).toLowerCase().replace(/\s+/g, '')
+// Categories where a size problem drops only the item; a core garment drops the whole look.
+const ACCESSORY = /accessor|belt|headwear|hat|sock|neckwear|bag|jewelry|sunglass|scarf|glove|wallet/i
+
+// The product's own size label that fits `want`, or null. Handles "L" in "L/XL", "32" in "32-34",
+// "32" in "32W | 33-35L", and "L" in "L (7 1/4)".
+// Every size label that fits `want` (a belt waist of 32 can fit both "28-32" and "32-34").
+export function matchSizes(want, sizes = []) {
+  const w = norm(want)
+  const n = Number(w)
+  return sizes.filter((s) => {
+    const ns = norm(s)
+    if (ns === w || ns.split('/').includes(w) || ns.split('(')[0] === w) return true
+    const range = ns.match(/^(\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)$/)
+    if (range && Number.isFinite(n) && n >= Number(range[1]) && n <= Number(range[2])) return true
+    return /^\d+$/.test(w) && new RegExp(`^${w}[wx]`).test(ns)
+  })
+}
+
+// The label to buy: the first matching size that is in stock, or null.
+export function matchSize(want, sizes = [], inventory) {
+  const fits = matchSizes(want, sizes)
+  return fits.find((s) => (inventory?.[s] ?? 1) > 0) ?? null
+}
+
+// '' = fine, otherwise the reason this stated size can't be bought.
+function sizeProblem(product, size) {
+  if (!size) return ''
+  const sizes = product.sizes ?? []
+  if (!sizes.length) return ''
+  const fits = matchSizes(size, sizes)
+  if (!fits.length) return `${product.title} comes in ${sizes.join(', ')}, not ${size}`
+  if (!matchSize(size, sizes, product.simulated?.inventory)) return `${product.title} is out of stock in ${fits.join(' / ')}`
+  return ''
+}
+
+// Drops unknown product_ids, mis-sized items and over-budget looks, and recomputes totals.
 export function validate(result, budget, gender) {
   const warnings = []
   const crossed = new Set() // looks that mix departments are dropped whole, not trimmed
+  let sizeIssue = false
   const looks = result.looks
     .map((look) => {
       let mixed = false
@@ -24,6 +61,17 @@ export function validate(result, budget, gender) {
         const product = catalog.get(item.product_id)
         if (!product) {
           warnings.push(`Dropped unknown product ${item.product_id}`)
+          return false
+        }
+        const problem = sizeProblem(product, item.size)
+        if (problem) {
+          sizeIssue = true
+          if (ACCESSORY.test(`${product.category} ${product.subcategory}`)) {
+            warnings.push(`Dropped ${item.product_id} from "${look.outfit_name}": ${problem}`)
+            return false
+          }
+          warnings.push(`Dropped "${look.outfit_name}": ${problem}`)
+          mixed = true // reuse the whole-look drop used for mixed departments
           return false
         }
         // A catalog without a gender field is men's only, so nothing to check.
@@ -51,7 +99,10 @@ export function validate(result, budget, gender) {
   // If looks were dropped, the agent's summary describes looks that no longer exist.
   const dropped = result.looks.length - looks.length
   const spoken_summary =
-    dropped > 0 && looks.length > 0
+    sizeIssue && looks.length > 0
+      ? // The agent may have claimed everything fits; say only what we can stand behind.
+        `I put together ${looks.length} ${looks.length === 1 ? 'look' : 'looks'}${budget ? ` under $${budget}` : ''}: ${looks.map((l) => l.outfit_name).join(' and ')}.`
+      : dropped > 0 && looks.length > 0
       ? `I put together ${looks.length} ${looks.length === 1 ? 'look' : 'looks'}${budget ? ` under $${budget}` : ''}: ${looks.map((l) => l.outfit_name).join(' and ')}.`
       : result.spoken_summary
   return { ...result, spoken_summary, looks, warnings }
