@@ -208,6 +208,32 @@ describe("style_outfit", () => {
     assert.ok(byteLength(r) <= 3500);
   });
 
+  it("background mode also speaks early errors, since style_outfit is add_to_context", async () => {
+    const pushed: RespondMessage[] = [];
+    const { router } = setup({ styleOutfitMode: "background" });
+    const r = await router.handle(call("style_outfit", { occasion: "gala" }), (m) => pushed.push(m));
+    ok(r, "error");
+    assert.equal(pushed.length, 1);
+    assert.match(pushed[0].properties.text, /^STYLIST RESULT, not said by the shopper\. .*budget/);
+  });
+
+  it("never sends square brackets to Sasha (Tavus strips them)", async () => {
+    const pushed: RespondMessage[] = [];
+    const { router } = setup({
+      styleOutfitMode: "background",
+      styleOutfit: async () => ({
+        looks: [{ outfit_name: "Look [A]", total_usd: 1, items: [{ product_id: "MW-0374", slot: "Suit", why: "w" }] }],
+        spoken_summary: "One look [linen].",
+      }),
+    });
+    await router.handle(call("style_outfit", { occasion: "w", budget_usd: 800 }), (m) => pushed.push(m));
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal(pushed.length, 1);
+    assert.doesNotMatch(pushed[0].properties.text, /[\[\]]/);
+    assert.match(pushed[0].properties.text, /MW-0374/);
+    assert.match(pushed[0].properties.text, /Look \(A\)/);
+  });
+
   it("background mode replies at once and pushes the looks later", async () => {
     let release!: () => void;
     const gate = new Promise<void>((r) => (release = r));
@@ -350,7 +376,7 @@ describe("tools.json", () => {
       search_products: ["generate_filler", "generate_response", []],
       show_product: ["silent", "generate_response", ["product_id"]],
       add_to_bag: ["silent", "generate_response", ["product_id"]],
-      style_outfit: ["generate_filler", "generate_response", ["occasion", "budget_usd"]],
+      style_outfit: ["generate_filler", "add_to_context", ["occasion", "budget_usd"]],
     };
     assert.deepEqual(tools.map((t: any) => t.name).sort(), Object.keys(want).sort());
     const prompt = readFileSync(new URL("../../pal/system-prompt.md", import.meta.url), "utf8");

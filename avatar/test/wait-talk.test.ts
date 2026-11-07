@@ -13,7 +13,7 @@ describe("wait talk", () => {
   it("stays silent before the first update is due", () => {
     const { said, talk } = setup();
     talk.start(0);
-    talk.tick(14_000);
+    talk.tick(9_000);
     assert.equal(said.length, 0);
   });
 
@@ -22,7 +22,7 @@ describe("wait talk", () => {
     talk.start(0);
     talk.step("Checking your closet");
     talk.step("Searching the catalog");
-    talk.tick(15_000);
+    talk.tick(10_000);
     assert.deepEqual(said, [waitTalkText("Searching the catalog")]);
   });
 
@@ -36,10 +36,10 @@ describe("wait talk", () => {
   it("waits for a quiet moment", () => {
     const { said, talk, setQuiet } = setup(0);
     talk.start(0);
-    talk.tick(15_000);
+    talk.tick(10_000);
     assert.equal(said.length, 0);
     setQuiet(3_000);
-    talk.tick(16_000);
+    talk.tick(11_000);
     assert.equal(said.length, 1);
   });
 
@@ -49,6 +49,10 @@ describe("wait talk", () => {
     talk.stop();
     talk.tick(60_000);
     assert.equal(said.length, 0);
+  });
+
+  it("has no square brackets, which Tavus strips from messages", () => {
+    assert.doesNotMatch(waitTalkText("Searching the catalog"), /[\[\]]/);
   });
 
   it("never names products", () => {
@@ -88,5 +92,18 @@ describe("speech tracker (Tavus started/stopped_speaking events)", () => {
     const t = createSpeechTracker();
     t.track(ev("conversation.tool_call"), 0);
     assert.equal(t.quietMs(60_000), 0);
+  });
+});
+
+describe("stylist result text", () => {
+  it("keeps product ids and has no square brackets", async () => {
+    const { stylistResultText } = await import("../router");
+    const text = stylistResultText({
+      spoken_summary: "Two looks.",
+      looks: [{ outfit_name: "Linen", total_usd: 595, items: [{ product_id: "MW-0374", slot: "Suit" }, { closet_item: "Navy chinos", slot: "Chinos" }] }],
+    });
+    assert.match(text, /MW-0374/);
+    assert.match(text, /Navy chinos/);
+    assert.doesNotMatch(text, /[\[\]]/);
   });
 });

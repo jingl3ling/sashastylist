@@ -53,8 +53,10 @@ export function shopperContext(shopper = readJson(join(here, '..', 'pal', 'demo-
   const lines = [
     'The store is connected: your tools search, open products, build looks and add to the bag on the shopper\'s screen.',
   ]
-  if (shopper) {
-    lines.push(`Shopper for this call: ${JSON.stringify(shopper)}`)
+  // Name and sizes stay out: Sasha asks for them, so anyone can demo it as themselves.
+  const closet = shopper?.closet?.map((c) => c.item).filter(Boolean)
+  if (closet?.length) {
+    lines.push(`Closet items this shopper already owns: ${closet.join(', ')}.`)
   }
   return lines.join('\n')
 }

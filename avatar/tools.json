@@ -101,7 +101,7 @@
   },
   {
     "name": "style_outfit",
-    "description": "Hand the brief to the styling agent, which builds three complete looks from the catalog and the shopper's closet and puts them on the outfit board. You need the event and the budget first. It is SLOW (about a minute) and the shopper can watch each step on screen. Usually this returns at once with started: true. Then keep the shopper company, never predict the result, and never call it again; the looks arrive in a later message marked [Stylist result]. When the looks arrive (or if this returns them directly), say spoken_summary in your own voice and ask which look the shopper likes. To change one piece of the looks, call it again with the same occasion and budget plus rework_slot and rework_feedback.",
+    "description": "Hand the brief to the styling agent, which builds three complete looks from the catalog and the shopper's closet and puts them on the outfit board. You need the event and the budget first. It is SLOW (about a minute) and the shopper can watch each step on screen. Usually this returns at once with started: true. Then keep the shopper company, never predict the result, and never call it again; the looks arrive in a later message starting with STYLIST RESULT. When the looks arrive (or if this returns them directly), say spoken_summary in your own voice and ask which look the shopper likes. To change one piece of the looks, call it again with the same occasion and budget plus rework_slot and rework_feedback.",
     "parameters": {
       "type": "object",
       "properties": {
@@ -133,7 +133,7 @@
     },
     "origin": "llm",
     "on_call": "generate_filler",
-    "on_resolve": "generate_response",
+    "on_resolve": "add_to_context",
     "delivery": {
       "app_message": true
     }

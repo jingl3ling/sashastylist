@@ -285,6 +285,19 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
     },
 
     async style_outfit(raw, barn, ctx) {
+      // style_outfit's on_resolve is add_to_context (tools.json), so Sasha never speaks a direct
+      // result. In background mode, anything she must react to now (a missing budget, a run
+      // already going, the limit used up) is also pushed to her as a spoken message.
+      const early = (text: string): HandlerResult => {
+        if (styleMode === "background" && ctx.send) {
+          try {
+            ctx.send(fitRespond(ctx.conversationId, `STYLIST RESULT, not said by the shopper. ${text}`, threshold));
+          } catch (e) {
+            log(`[tool] style_outfit early send failed: ${(e as Error).message}`);
+          }
+        }
+        return err(text);
+      };
       const v = validate(raw, {
         occasion: { type: "string", required: true },
         budget_usd: { type: "number", required: true },
@@ -292,13 +305,13 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         rework_slot: { type: "string" },
         rework_feedback: { type: "string" },
       });
-      if (!v.ok) return err(v.error);
+      if (!v.ok) return early(v.error);
       if (styleRunning) {
-        return err("Looks are still being built. Don't call style_outfit again; tell the shopper it's still cooking.");
+        return early("Looks are still being built. Don't call style_outfit again; tell the shopper it's still cooking.");
       }
       const a = v.args;
       const asked = a.budget_usd as number;
-      if (!(asked > 0)) return err("The budget has to be more than zero. Ask the shopper what they want to spend.");
+      if (!(asked > 0)) return early("The budget has to be more than zero. Ask the shopper what they want to spend.");
       // $10,000 per conversation across all outfits and the bag. Items bought from a look count
       // toward both, so committed spend is the larger of the bag and the other outfits' budgets.
       const key = occasionKey(a.occasion as string);
@@ -306,7 +319,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       const bagTotal = (await barn.getBag())?.total ?? 0;
       const room = usd(limit - Math.max(bagTotal, otherOutfits));
       if (room <= 0) {
-        return err(`The ${limit} dollar limit for this conversation is used up by the earlier outfits and the bag. Tell the shopper no more looks this time.`);
+        return early(`The ${limit} dollar limit for this conversation is used up by the earlier outfits and the bag. Tell the shopper no more looks this time.`);
       }
       const capped = Math.min(asked, room);
       const req: RunRequest = {
@@ -358,8 +371,8 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       void run().then((r) => {
         const text =
           r.status === "success"
-            ? `[Stylist result, not said by the shopper] The looks are on the outfit board now: ${JSON.stringify(r.output)}. Say spoken_summary in your own voice and ask which look the shopper likes.`
-            : `[Stylist result, not said by the shopper] ${r.output}`;
+            ? stylistResultText(r.output as ReturnType<typeof compactStylist>)
+            : `STYLIST RESULT, not said by the shopper. ${r.output}`;
         const msg = fitRespond(ctx.conversationId, text, threshold);
         opts.onLog?.({ dir: "info", text: `style_outfit pushed ${r.status} via conversation.respond (${byteLength(msg)}B)` });
         try {
@@ -381,6 +394,18 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
 }
 
 // ---- stylist result compaction ----
+
+// Plain text with no square brackets or JSON: Tavus strips bracketed text from these
+// messages, which removed the looks' items and left Sasha with no product ids.
+export function stylistResultText(o: ReturnType<typeof compactStylist>): string {
+  const looks = o.looks.map((l, n) => {
+    const items = (l.items ?? [])
+      .map((it) => ("product_id" in it ? `${it.slot} is product_id ${it.product_id}` : `${it.slot} is the shopper's own ${it.closet_item}`))
+      .join("; ");
+    return `Look ${n + 1}, ${l.outfit_name}, ${l.total_usd} dollars: ${items}.`;
+  });
+  return `STYLIST RESULT, not said by the shopper. The looks are on the outfit board now. spoken_summary: ${o.spoken_summary} ${looks.join(" ")} Say spoken_summary in your own voice and ask which look the shopper likes.`;
+}
 
 function compactStylist(res: StylistResult) {
   return {
@@ -408,11 +433,12 @@ const stylistTrims: Trim[] = [
 ];
 
 function fitRespond(conversationId: string, text: string, threshold: number): RespondMessage {
+  // Tavus strips square-bracketed text from these messages, so never send brackets.
   const make = (t: string): RespondMessage => ({
     message_type: "conversation",
     event_type: "conversation.respond",
     conversation_id: conversationId,
-    properties: { text: t },
+    properties: { text: t.replace(/\[/g, "(").replace(/\]/g, ")") },
   });
   let msg = make(text);
   while (byteLength(msg) > threshold && text.length > 200) {
