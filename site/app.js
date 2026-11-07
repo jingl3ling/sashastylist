@@ -199,5 +199,8 @@ function route() {
 document.getElementById("search").addEventListener("submit", (e) => { e.preventDefault(); const v = document.getElementById("q").value.trim(); location.hash = v ? "#/shop?q=" + encodeURIComponent(v) : "#/shop"; });
 addEventListener("hashchange", route);
 // barn.js waits on CATALOG before window.Barn reports ready.
-const CATALOG = Promise.all([fetch(DATA + "products.json").then((r) => r.json()), fetch(DATA + "outfits.json").then((r) => r.json())]).then(([a, b]) => { P = a; L = b; a.forEach((p) => (byId[p.id] = p)); route(); })
-  .catch(() => { main.innerHTML = `<div class="container"><p class="empty">The catalog didn’t load. Serve the project root over HTTP, then open /site/.</p></div>`; });
+// Wait for every page script (barn.js, bag.js, board.js, avatar) before the first route: the catalog can arrive
+// before a script that a page needs (e.g. stylistPage in board.js) has finished downloading.
+const domReady = new Promise((r) => (document.readyState === "loading" ? addEventListener("DOMContentLoaded", r, { once: true }) : r()));
+const CATALOG = Promise.all([fetch(DATA + "products.json").then((r) => r.json()), fetch(DATA + "outfits.json").then((r) => r.json()), domReady]).then(([a, b]) => { P = a; L = b; a.forEach((p) => (byId[p.id] = p)); route(); })
+  .catch((e) => { console.error("Store failed to start:", e); main.innerHTML = `<div class="container"><p class="empty">The catalog didn’t load. Serve the project root over HTTP, then open /site/.</p></div>`; });
