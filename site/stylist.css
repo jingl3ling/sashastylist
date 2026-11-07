@@ -2,14 +2,14 @@
 :root { --stylist-w: 360px; }
 
 .stylist { position: fixed; inset: 0 0 0 auto; width: min(100%, var(--stylist-w)); z-index: var(--z-modal); display: flex; flex-direction: column; gap: var(--space-md);
-  padding: var(--space-md); box-sizing: border-box; background: var(--color-card); border-left: var(--rule-hair) solid var(--color-rule); overflow-y: auto;
+  padding: var(--space-md); box-sizing: border-box; background: var(--color-card); border-left: var(--rule-hair) solid var(--color-rule); overflow: hidden;
   transform: translateX(100%); transition: transform var(--dur-short) var(--ease-out); }
 .stylist[data-open] { transform: none; box-shadow: var(--shadow-card); }
 .stylist-head { display: flex; align-items: baseline; justify-content: space-between; }
 .stylist-head h2 { margin: 0; font-family: var(--font-display); font-weight: var(--serif-small); font-size: var(--text-lg); }
 .stylist-close { border: 0; background: none; color: var(--color-muted); font: inherit; font-size: var(--text-sm); cursor: pointer; text-decoration: underline; }
 
-.stylist-video { position: relative; aspect-ratio: 4 / 3; background: var(--color-paper-3); display: grid; place-items: center; overflow: hidden; }
+.stylist-video { position: relative; flex: none; aspect-ratio: 16 / 10; max-height: 36vh; min-height: 8rem; width: 100%; background: var(--color-paper-3); display: grid; place-items: center; overflow: hidden; }
 .stylist-video > iframe, .stylist-video > video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .stylist-empty { margin: 0; padding: var(--space-md); text-align: center; color: var(--color-muted); font-size: var(--text-sm); }
 /* Before the call: Sasha's photo with the invitation over it. */
@@ -32,7 +32,16 @@
 .stylist-feed li[data-status="stopped"] { color: var(--color-muted); }
 .stylist-feed .feed-count { color: var(--color-muted); font-variant-numeric: tabular-nums; }
 
-.stylist-form { margin-top: auto; display: flex; gap: var(--space-xs); align-items: end; }
+/* The video and the type box stay put; the transcript and the activity feed scroll in their own space
+   (before, a long run pushed the video out of view). The transcript's markup and inline styles come from
+   avatar/web.ts, so the overrides below need !important. */
+.avatar-transcript { flex: 0 0 auto; margin: 0 !important; }
+/* The caption code scrolls this inner list to the newest line, so keep it the scroller and just cap it. */
+.avatar-transcript .avatar-transcript-lines { max-height: clamp(5rem, 22vh, 14rem) !important; overflow-y: auto !important; overscroll-behavior: contain; }
+.stylist-feed { flex: 1 1 5rem; min-height: 4.5rem; overflow-y: auto; overscroll-behavior: contain; }
+.stylist-feed h3 { position: sticky; top: 0; background: var(--color-card); }
+
+.stylist-form { flex: none; margin-top: auto; display: flex; gap: var(--space-xs); align-items: end; }
 .stylist-form input { flex: 1; min-width: 0; border: 0; border-bottom: var(--rule-hair) solid var(--color-rule); background: transparent; color: var(--color-ink);
   padding: var(--space-xs) 0; font: inherit; font-size: var(--text-sm); border-radius: 0; }
 .stylist-form input::placeholder { color: var(--color-muted); }
