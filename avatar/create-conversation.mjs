@@ -53,11 +53,7 @@ export function shopperContext(shopper = readJson(join(here, '..', 'pal', 'demo-
   const lines = [
     'The store is connected: your tools search, open products, build looks and add to the bag on the shopper\'s screen.',
   ]
-  // Name and sizes stay out: Sasha asks for them, so anyone can demo it as themselves.
-  const closet = shopper?.closet?.map((c) => c.item).filter(Boolean)
-  if (closet?.length) {
-    lines.push(`Closet items this shopper already owns: ${closet.join(', ')}.`)
-  }
+  // Name, sizes and closet stay out: Sasha asks, and only uses pieces she sees on camera.
   // Department, if the shopper file has it (Jing: "gender": "men" | "women"). Never guessed from camera.
   if (shopper?.gender === 'men' || shopper?.gender === 'women') {
     lines.push(`Department for this shopper: ${shopper.gender === 'women' ? "women's" : "men's"}. Pass gender "${shopper.gender}" to style_outfit.`)
