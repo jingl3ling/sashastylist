@@ -1,0 +1,378 @@
+[
+ {
+  "theme": "formal-wedding",
+  "name": "Classic Black Tuxedo",
+  "description": "The traditional black-tie choice for an evening wedding.",
+  "items": [
+   {
+    "slot": "Tuxedo Jacket",
+    "product_id": "MW-0490"
+   },
+   {
+    "slot": "Tuxedo Pants",
+    "product_id": "MW-0512"
+   },
+   {
+    "slot": "Dress Shirt",
+    "product_id": "MW-0066"
+   },
+   {
+    "slot": "Bow Tie",
+    "product_id": "MW-0193"
+   },
+   {
+    "slot": "Cummerbund",
+    "product_id": "MW-0134"
+   },
+   {
+    "slot": "Cufflinks",
+    "product_id": "MW-0129"
+   },
+   {
+    "slot": "Pocket Square",
+    "product_id": "MW-0136"
+   },
+   {
+    "slot": "Dress Shoes",
+    "product_id": "MW-0083"
+   },
+   {
+    "slot": "Socks",
+    "product_id": "MW-0312"
+   }
+  ]
+ },
+ {
+  "theme": "formal-wedding",
+  "name": "White Dinner Jacket",
+  "description": "A warm-weather black-tie look with an ivory jacket and black trousers.",
+  "items": [
+   {
+    "slot": "Tuxedo Jacket",
+    "product_id": "MW-0492"
+   },
+   {
+    "slot": "Tuxedo Pants",
+    "product_id": "MW-0512"
+   },
+   {
+    "slot": "Dress Shirt",
+    "product_id": "MW-0059"
+   },
+   {
+    "slot": "Bow Tie",
+    "product_id": "MW-0193"
+   },
+   {
+    "slot": "Cufflinks",
+    "product_id": "MW-0129"
+   },
+   {
+    "slot": "Pocket Square",
+    "product_id": "MW-0141"
+   },
+   {
+    "slot": "Dress Shoes",
+    "product_id": "MW-0083"
+   },
+   {
+    "slot": "Socks",
+    "product_id": "MW-0312"
+   }
+  ]
+ },
+ {
+  "theme": "formal-wedding",
+  "name": "Midnight Navy Tuxedo",
+  "description": "A modern formal option in deep navy with a peak lapel.",
+  "items": [
+   {
+    "slot": "Tuxedo Jacket",
+    "product_id": "MW-0491"
+   },
+   {
+    "slot": "Tuxedo Pants",
+    "product_id": "MW-0513"
+   },
+   {
+    "slot": "Dress Shirt",
+    "product_id": "MW-0066"
+   },
+   {
+    "slot": "Bow Tie",
+    "product_id": "MW-0194"
+   },
+   {
+    "slot": "Cufflinks",
+    "product_id": "MW-0129"
+   },
+   {
+    "slot": "Pocket Square",
+    "product_id": "MW-0143"
+   },
+   {
+    "slot": "Dress Shoes",
+    "product_id": "MW-0083"
+   },
+   {
+    "slot": "Socks",
+    "product_id": "MW-0312"
+   }
+  ]
+ },
+ {
+  "theme": "beach-wedding",
+  "name": "Solid Tan Suit",
+  "description": "A classic destination-wedding suit, worn with linen and no tie.",
+  "items": [
+   {
+    "slot": "Suit",
+    "product_id": "MW-0358"
+   },
+   {
+    "slot": "Button-Up",
+    "product_id": "MW-0277"
+   },
+   {
+    "slot": "Loafers",
+    "product_id": "MW-0092"
+   },
+   {
+    "slot": "Belt",
+    "product_id": "MW-0035"
+   },
+   {
+    "slot": "Pocket Square",
+    "product_id": "MW-0143"
+   }
+  ]
+ },
+ {
+  "theme": "beach-wedding",
+  "name": "Seersucker Separates",
+  "description": "A light blue seersucker jacket with flax linen trousers.",
+  "items": [
+   {
+    "slot": "Sport Coat",
+    "product_id": "MW-0334"
+   },
+   {
+    "slot": "Dress Pants",
+    "product_id": "MW-0469"
+   },
+   {
+    "slot": "Button-Up",
+    "product_id": "MW-0284"
+   },
+   {
+    "slot": "Loafers",
+    "product_id": "MW-0092"
+   },
+   {
+    "slot": "Belt",
+    "product_id": "MW-0035"
+   },
+   {
+    "slot": "Bow Tie",
+    "product_id": "MW-0196"
+   }
+  ]
+ },
+ {
+  "theme": "beach-wedding",
+  "name": "Stone Crosshatch Suit",
+  "description": "An unstructured stone suit for a relaxed ceremony on the sand.",
+  "items": [
+   {
+    "slot": "Suit",
+    "product_id": "MW-0359"
+   },
+   {
+    "slot": "Button-Up",
+    "product_id": "MW-0267"
+   },
+   {
+    "slot": "Loafers",
+    "product_id": "MW-0092"
+   },
+   {
+    "slot": "Belt",
+    "product_id": "MW-0035"
+   },
+   {
+    "slot": "Necktie",
+    "product_id": "MW-0205"
+   }
+  ]
+ },
+ {
+  "theme": "beach-vacation",
+  "name": "Poolside Linen",
+  "description": "A camp shirt and swim trunks for long days by the water.",
+  "items": [
+   {
+    "slot": "Swim Trunks",
+    "product_id": "MW-0412"
+   },
+   {
+    "slot": "Button-Up",
+    "product_id": "MW-0278"
+   },
+   {
+    "slot": "Sandals",
+    "product_id": "MW-0094"
+   },
+   {
+    "slot": "Sunglasses",
+    "product_id": "MW-0012"
+   },
+   {
+    "slot": "Hat",
+    "product_id": "MW-0158"
+   }
+  ]
+ },
+ {
+  "theme": "beach-vacation",
+  "name": "Boardwalk Casual",
+  "description": "Linen shorts and a soft tee for dinner or a walk into town.",
+  "items": [
+   {
+    "slot": "Shorts",
+    "product_id": "MW-0301"
+   },
+   {
+    "slot": "Tee",
+    "product_id": "MW-0414"
+   },
+   {
+    "slot": "Sandals",
+    "product_id": "MW-0097"
+   },
+   {
+    "slot": "Sunglasses",
+    "product_id": "MW-0015"
+   },
+   {
+    "slot": "Bag",
+    "product_id": "MW-0008"
+   }
+  ]
+ },
+ {
+  "theme": "beach-vacation",
+  "name": "Surf Day",
+  "description": "Board shorts with an easy streetwear tee.",
+  "items": [
+   {
+    "slot": "Swim Trunks",
+    "product_id": "MW-0400"
+   },
+   {
+    "slot": "Tee",
+    "product_id": "MW-0422"
+   },
+   {
+    "slot": "Sandals",
+    "product_id": "MW-0094"
+   },
+   {
+    "slot": "Hat",
+    "product_id": "MW-0158"
+   },
+   {
+    "slot": "Sunglasses",
+    "product_id": "MW-0012"
+   }
+  ]
+ },
+ {
+  "theme": "business-casual",
+  "name": "Navy Blazer Classic",
+  "description": "A navy sport coat, oxford shirt and chinos for client days.",
+  "items": [
+   {
+    "slot": "Sport Coat",
+    "product_id": "MW-0333"
+   },
+   {
+    "slot": "Button-Up",
+    "product_id": "MW-0264"
+   },
+   {
+    "slot": "Chinos",
+    "product_id": "MW-0444"
+   },
+   {
+    "slot": "Loafers",
+    "product_id": "MW-0091"
+   },
+   {
+    "slot": "Belt",
+    "product_id": "MW-0035"
+   },
+   {
+    "slot": "Socks",
+    "product_id": "MW-0312"
+   }
+  ]
+ },
+ {
+  "theme": "business-casual",
+  "name": "Quarter-Zip Office",
+  "description": "A knit quarter-zip layered over a shirt for everyday work.",
+  "items": [
+   {
+    "slot": "Sweater",
+    "product_id": "MW-0384"
+   },
+   {
+    "slot": "Button-Up",
+    "product_id": "MW-0263"
+   },
+   {
+    "slot": "Dress Pants",
+    "product_id": "MW-0459"
+   },
+   {
+    "slot": "Boots",
+    "product_id": "MW-0070"
+   },
+   {
+    "slot": "Belt",
+    "product_id": "MW-0035"
+   },
+   {
+    "slot": "Socks",
+    "product_id": "MW-0331"
+   }
+  ]
+ },
+ {
+  "theme": "business-casual",
+  "name": "Polo and Trousers",
+  "description": "A smart polo and tailored trousers for warm office days.",
+  "items": [
+   {
+    "slot": "Polo",
+    "product_id": "MW-0249"
+   },
+   {
+    "slot": "Dress Pants",
+    "product_id": "MW-0458"
+   },
+   {
+    "slot": "Loafers",
+    "product_id": "MW-0091"
+   },
+   {
+    "slot": "Belt",
+    "product_id": "MW-0035"
+   },
+   {
+    "slot": "Socks",
+    "product_id": "MW-0329"
+   }
+  ]
+ }
+]

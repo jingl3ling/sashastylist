@@ -1,0 +1,16 @@
+data/raw/
+data/interim_candidates.json
+data/image_jobs.tsv
+data/adidas_live.txt*
+data/exclude.json
+.claude/
+.hallmark/
+.DS_Store
+
+# Secrets (this repo is public)
+.env
+.env.*
+!.env.example
+
+# Product photos load from Mike's live site
+data/catalog/images/
