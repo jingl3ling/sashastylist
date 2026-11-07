@@ -28,7 +28,7 @@
   padding: var(--space-xs) 0; font: inherit; font-size: var(--text-sm); border-radius: 0; }
 .stylist-form input::placeholder { color: var(--color-muted); }
 
-.stylist-toggle { position: fixed; right: var(--space-md); bottom: var(--space-md); z-index: var(--z-sticky); }
+.stylist-toggle { position: fixed; right: var(--space-md); bottom: var(--space-md); z-index: var(--z-sticky); background: var(--color-paper); box-shadow: var(--shadow-card); }
 
 /* Wide screens: the panel is always visible and the store makes room for it. */
 @media (min-width: 75rem) {

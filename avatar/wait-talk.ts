@@ -1,5 +1,5 @@
 // Keeps Sasha's show going during a style_outfit run, so the shopper isn't left in silence.
-// Every so often it passes the latest agent step to her as a [Stylist update] message.
+// Every so often it passes the latest agent step to her as a STYLIST UPDATE message.
 // It only speaks up in a quiet moment, so she never talks over the shopper or herself.
 
 export interface WaitTalkOptions {
@@ -15,14 +15,14 @@ export interface WaitTalkOptions {
 
 export function waitTalkText(step: string | undefined): string {
   const doing = step ? `The styling agent is on this step: "${step}".` : "The styling agent is still working.";
-  return `[Stylist update, not said by the shopper] ${doing} Give it a quick nod, then keep your show going: carry on with your story, or start your next bit. Don't name products or prices.`;
+  return `STYLIST UPDATE, not said by the shopper. ${doing} Give it a quick nod, then keep your show going: carry on with your story, or start your next bit. Don't name products or prices.`;
 }
 
 export function createWaitTalk(opts: WaitTalkOptions) {
-  const firstMs = opts.firstMs ?? 15_000;
-  const everyMs = opts.everyMs ?? 15_000;
-  const maxUpdates = opts.maxUpdates ?? 4;
-  const quietNeededMs = opts.quietNeededMs ?? 2_500;
+  const firstMs = opts.firstMs ?? 8_000;
+  const everyMs = opts.everyMs ?? 10_000;
+  const maxUpdates = opts.maxUpdates ?? 8;
+  const quietNeededMs = opts.quietNeededMs ?? 2_000;
   let running = false;
   let nextAt = 0;
   let sent = 0;

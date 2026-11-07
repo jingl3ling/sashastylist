@@ -3,7 +3,7 @@
 // No DOM or Daily imports, so it runs in node tests as-is.
 
 import type { Barn, BarnSearchFilters, RunRequest, StylistResult } from "./types";
-import type { StyleOutfitFn } from "./style-outfit";
+import { isDepartmentQuestion, StylistRunError, type StyleOutfitFn } from "./style-outfit";
 
 /** Tavus drops app messages over 4 KB silently, so results are trimmed below this. */
 export const MAX_APP_MESSAGE_BYTES = 4096;
@@ -178,12 +178,19 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
   const log = opts.logger ?? ((line: string) => console.log(line));
   const threshold = opts.trimThresholdBytes ?? TRIM_THRESHOLD_BYTES;
   let styleRunning = false;
+  /** Department last used in this conversation, so a forgotten gender arg doesn't flip departments mid-call. */
+  const departments = new Map<string, "men" | "women">();
+  const department = (ctx: HandlerContext, given: unknown) => {
+    const g = normalizeGender(typeof given === "string" ? given : undefined);
+    if (g) departments.set(ctx.conversationId, g);
+    return g ?? departments.get(ctx.conversationId);
+  };
   /** Budgets of the outfits built so far, keyed by occasion (a rework or a retry of the same occasion replaces, not adds). */
   const outfitBudgets = new Map<string, number>();
   const occasionKey = (o: string) => o.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
   return {
-    async search_products(raw, barn) {
+    async search_products(raw, barn, ctx) {
       // Sasha's prompt calls the text filter "q"; the tool schema calls it "query". Accept both.
       if (raw && typeof raw === "object" && (raw as any).query == null && (raw as any).q != null) raw = { ...raw, query: (raw as any).q };
       const v = validate(raw, {
@@ -195,6 +202,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         max_price: { type: "number" },
         size: { type: "string" },
         on_sale: { type: "boolean" },
+        gender: { type: "string" },
       });
       if (!v.ok) return err(v.error);
       const a = v.args;
@@ -206,6 +214,8 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       if (a.color) filters.color = a.color as string;
       if (a.max_price !== undefined) filters.max_price = a.max_price as number;
       if (a.size) filters.size = a.size as string;
+      const g = department(ctx, a.gender);
+      if (g) filters.gender = g;
       if (a.on_sale) filters.sale = true;
       const results = (await barn.search(filters)) ?? [];
       for (const p of results) prices.set(p.id, p.price);
@@ -285,20 +295,35 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
     },
 
     async style_outfit(raw, barn, ctx) {
+      // style_outfit's on_resolve is add_to_context (tools.json), so Sasha never speaks a direct
+      // result. In background mode, anything she must react to now (a missing budget, a run
+      // already going, the limit used up) is also pushed to her as a spoken message.
+      const early = (text: string): HandlerResult => {
+        if (styleMode === "background" && ctx.send) {
+          try {
+            ctx.send(fitRespond(ctx.conversationId, `STYLIST RESULT, not said by the shopper. ${text}`, threshold));
+          } catch (e) {
+            log(`[tool] style_outfit early send failed: ${(e as Error).message}`);
+          }
+        }
+        return err(text);
+      };
       const v = validate(raw, {
         occasion: { type: "string", required: true },
         budget_usd: { type: "number", required: true },
         notes: { type: "string" },
         rework_slot: { type: "string" },
         rework_feedback: { type: "string" },
+        gender: { type: "string" },
       });
-      if (!v.ok) return err(v.error);
+      if (!v.ok) return early(v.error);
       if (styleRunning) {
-        return err("Looks are still being built. Don't call style_outfit again; tell the shopper it's still cooking.");
+        return early("Looks are still being built. Don't call style_outfit again; tell the shopper it's still cooking.");
       }
       const a = v.args;
+      const gender = department(ctx, a.gender);
       const asked = a.budget_usd as number;
-      if (!(asked > 0)) return err("The budget has to be more than zero. Ask the shopper what they want to spend.");
+      if (!(asked > 0)) return early("The budget has to be more than zero. Ask the shopper what they want to spend.");
       // $10,000 per conversation across all outfits and the bag. Items bought from a look count
       // toward both, so committed spend is the larger of the bag and the other outfits' budgets.
       const key = occasionKey(a.occasion as string);
@@ -306,7 +331,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       const bagTotal = (await barn.getBag())?.total ?? 0;
       const room = usd(limit - Math.max(bagTotal, otherOutfits));
       if (room <= 0) {
-        return err(`The ${limit} dollar limit for this conversation is used up by the earlier outfits and the bag. Tell the shopper no more looks this time.`);
+        return early(`The ${limit} dollar limit for this conversation is used up by the earlier outfits and the bag. Tell the shopper no more looks this time.`);
       }
       const capped = Math.min(asked, room);
       const req: RunRequest = {
@@ -315,6 +340,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         occasion: a.occasion as string,
         budget_usd: capped,
         ...(a.notes ? { notes: a.notes as string } : {}),
+        ...(gender ? { gender } : {}),
         ...(a.rework_slot && a.rework_feedback
           ? { rework: { slot: a.rework_slot as string, feedback: a.rework_feedback as string } }
           : {}),
@@ -331,6 +357,11 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
           res = await withTimeout(opts.styleOutfit(req), styleTimeout);
         } catch (e) {
           opts.onLog?.({ dir: "info", text: `style_outfit backend failed: ${(e as Error).message}` });
+          if (e instanceof StylistRunError && isDepartmentQuestion(e.backendMessage)) {
+            return err(
+              `The stylist needs the department before it can build looks. Ask the shopper this aloud, once: "${e.backendMessage}" Then call style_outfit again with the same occasion and budget and gender set to men or women.`,
+            );
+          }
           return err("The stylist couldn't finish those looks. Say so plainly and offer to try again.");
         } finally {
           styleRunning = false;
@@ -358,8 +389,8 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       void run().then((r) => {
         const text =
           r.status === "success"
-            ? `[Stylist result, not said by the shopper] The looks are on the outfit board now: ${JSON.stringify(r.output)}. Say spoken_summary in your own voice and ask which look the shopper likes.`
-            : `[Stylist result, not said by the shopper] ${r.output}`;
+            ? stylistResultText(r.output as ReturnType<typeof compactStylist>)
+            : `STYLIST RESULT, not said by the shopper. ${r.output}`;
         const msg = fitRespond(ctx.conversationId, text, threshold);
         opts.onLog?.({ dir: "info", text: `style_outfit pushed ${r.status} via conversation.respond (${byteLength(msg)}B)` });
         try {
@@ -373,14 +404,34 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         output: {
           started: true,
           ...capNote,
-          note: "The stylist is building three looks; it takes about a minute and the shopper can watch the steps on screen. Keep chatting. The looks arrive as a new message; don't call style_outfit again.",
+          note: "The stylist is working on this request and it takes about a minute. Keep telling short stories and jokes. The looks arrive in a new message starting with STYLIST RESULT. After that, call style_outfit again for any new request.",
         },
       };
     },
   };
 }
 
+/** "men" | "women" from loose words; anything else (or nothing) means unknown, so it isn't sent. */
+export function normalizeGender(v: string | undefined): "men" | "women" | undefined {
+  const w = (v ?? "").toLowerCase().replace(/[^a-z]/g, "");
+  if (/^(women|woman|womens|female|ladies|lady|womenswear)$/.test(w)) return "women";
+  if (/^(men|man|mens|male|gents|menswear)$/.test(w)) return "men";
+  return undefined;
+}
+
 // ---- stylist result compaction ----
+
+// Plain text with no square brackets or JSON: Tavus strips bracketed text from these
+// messages, which removed the looks' items and left Sasha with no product ids.
+export function stylistResultText(o: ReturnType<typeof compactStylist>): string {
+  const looks = o.looks.map((l, n) => {
+    const items = (l.items ?? [])
+      .map((it) => ("product_id" in it ? `${it.slot} is product_id ${it.product_id}` : `${it.slot} is the shopper's own ${it.closet_item}`))
+      .join("; ");
+    return `Look ${n + 1}, ${l.outfit_name}, ${l.total_usd} dollars: ${items}.`;
+  });
+  return `STYLIST RESULT, not said by the shopper. The looks are on the outfit board now. spoken_summary: ${o.spoken_summary} ${looks.join(" ")} Say spoken_summary in your own voice and ask which look the shopper likes.`;
+}
 
 function compactStylist(res: StylistResult) {
   return {
@@ -408,11 +459,12 @@ const stylistTrims: Trim[] = [
 ];
 
 function fitRespond(conversationId: string, text: string, threshold: number): RespondMessage {
+  // Tavus strips square-bracketed text from these messages, so never send brackets.
   const make = (t: string): RespondMessage => ({
     message_type: "conversation",
     event_type: "conversation.respond",
     conversation_id: conversationId,
-    properties: { text: t },
+    properties: { text: t.replace(/\[/g, "(").replace(/\]/g, ")") },
   });
   let msg = make(text);
   while (byteLength(msg) > threshold && text.length > 200) {

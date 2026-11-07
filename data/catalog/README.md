@@ -1,9 +1,9 @@
-# Menswear demo catalog
+# Fashion Barn demo catalog
 
 Hackathon demo data. Not for commercial use.
 
 - `products.json`: full catalog. `products.csv`: flat version with the first 3 photos.
-- `outfits.json`: 12 outfits across 4 themes. Each item points to a product `id`.
+- `outfits.json`: 24 outfits across 4 themes, 12 women’s and 12 men’s. Each item points to a product `id`.
 - `images/`: local photos. Paths in `products.json` are relative to this folder.
 
 ## What is real and what is simulated
@@ -18,6 +18,7 @@ Prices start from the source price, with a minimum per category because some Bla
 ## Sources
 
 Shopify `/products.json` feeds: The Black Tux, State & Liberty, Tie Bar, Taylor Stitch, Thursday, Stüssy, Kith, Mack Weldon, BDGA.
+Women’s feeds: Birdy Grey, Staud, Ulla Johnson, Show Me Your Mumu, M.M.LaFleur, Cuyana, Anine Bing, Agolde, Mother, Jenni Kayne, Naadam, Alo, Beyond Yoga, Outdoor Voices, L*Space, Solid & Striped, Vitamin A, Sarah Flint, Dolce Vita, Birdies, Loeffler Randall, Gorjana, Kith.
 Kaggle: `whenamancodes/adidas-us-retail-products-dataset`.
 
 Photos and copy belong to their brands. `source_url` records each item's origin.

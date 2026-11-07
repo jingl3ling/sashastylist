@@ -1,6 +1,7 @@
 {
   "shopper_id": "demo-shopper",
   "name": "Alex",
+  "gender": "men",
   "sizes": {
     "jacket": "40R",
     "shirt": "15.5 / 32-33",
@@ -10,8 +11,16 @@
   "preferences": {
     "style": "Clean and classic, with nothing too flashy",
     "fit": "Tailored but comfortable, not skinny",
-    "colors": ["navy", "white", "tan", "light blue"],
-    "avoid": ["loud patterns", "heavy fabrics in warm weather"],
+    "colors": [
+      "navy",
+      "white",
+      "tan",
+      "light blue"
+    ],
+    "avoid": [
+      "loud patterns",
+      "heavy fabrics in warm weather"
+    ],
     "notes": "Doesn't love shopping. Wants to look put together without overthinking it."
   },
   "closet": [

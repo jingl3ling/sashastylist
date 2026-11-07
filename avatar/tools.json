@@ -1,17 +1,25 @@
 [
   {
     "name": "search_products",
-    "description": "Search the Men's Fashion Barn catalog and filter the product grid the shopper is looking at. Call it for any browsing request, and right after the shopper describes an event so the page starts moving. Fill in only the filters the shopper's words support. max_price is a per-item limit, never an outfit budget. Returns up to 5 matches (id, title, brand, price); name two at most, the rest are on screen.",
+    "description": "Search the Fashion Barn catalog (men's and women's departments) and filter the product grid the shopper is looking at. Call it for any browsing request, and right after the shopper describes an event so the page starts moving. Fill in only the filters the shopper's words support. max_price is a per-item limit, never an outfit budget. Returns up to 5 matches (id, title, brand, price); name two at most, the rest are on screen.",
     "parameters": {
       "type": "object",
       "properties": {
+        "gender": {
+          "type": "string",
+          "enum": [
+            "men",
+            "women"
+          ],
+          "description": "Which department to search: 'men' or 'women'. Always pass it once you know it; without it results mix both departments. Never decide it from the camera."
+        },
         "query": {
           "type": "string",
           "description": "Garment words matched against product names only, e.g. 'linen suit', 'loafers', 'oxford shirt'. Never put the occasion or place here ('wedding', 'Italy', 'beach'): that matches nothing. Use department, style and color for the rest."
         },
         "department": {
           "type": "string",
-          "description": "One of: 'Suits & tuxedos', 'Shirts & tees', 'Knits & sweats', 'Trousers & denim', 'Shorts & swim', 'Outerwear', 'Shoes', 'Ties & formal extras', 'Accessories'. Loose names like 'suits' or 'shoes' also work."
+          "description": "Men's departments: 'Suits & tuxedos', 'Shirts & tees', 'Knits & sweats', 'Trousers & denim', 'Shorts & swim', 'Outerwear', 'Shoes', 'Ties & formal extras', 'Accessories'. Women's departments: 'Dresses', 'Tops', 'Bottoms', 'Outerwear', 'Activewear', 'Swim', 'Shoes', 'Bags', 'Jewelry & accessories'. Loose names like 'suits' or 'shoes' also work."
         },
         "style": {
           "type": "string",
@@ -101,7 +109,7 @@
   },
   {
     "name": "style_outfit",
-    "description": "Hand the brief to the styling agent, which builds three complete looks from the catalog and the shopper's closet and puts them on the outfit board. You need the event and the budget first. It is SLOW (about a minute) and the shopper can watch each step on screen. Usually this returns at once with started: true. Then keep the shopper company, never predict the result, and never call it again; the looks arrive in a later message marked [Stylist result]. When the looks arrive (or if this returns them directly), say spoken_summary in your own voice and ask which look the shopper likes. To change one piece of the looks, call it again with the same occasion and budget plus rework_slot and rework_feedback.",
+    "description": "Hand the brief to the styling agent, which builds three complete looks from the catalog and the shopper's closet and puts them on the outfit board. You need the event and the budget first, and the department (men or women) if the shopper has said it. It is SLOW (about a minute) and the shopper can watch each step on screen. Usually this returns at once with started: true. Then keep the shopper company and never predict the result. Don't repeat a request that is still running, but do call it again for any new request after its looks arrive; the looks arrive in a later message starting with STYLIST RESULT. When the looks arrive (or if this returns them directly), say spoken_summary in your own voice and ask which look the shopper likes. To change one piece of the looks, call it again with the same occasion and budget plus rework_slot and rework_feedback.",
     "parameters": {
       "type": "object",
       "properties": {
@@ -124,6 +132,14 @@
         "rework_feedback": {
           "type": "string",
           "description": "Only when changing one piece: what's wrong with it, e.g. 'too formal'."
+        },
+        "gender": {
+          "type": "string",
+          "enum": [
+            "men",
+            "women"
+          ],
+          "description": "Which department to style from: 'men' or 'women', as the shopper said it. Never decide it from the camera. If you don't know, leave it out: the result will then ask you to check with the shopper, and you call again with it."
         }
       },
       "required": [
@@ -133,7 +149,7 @@
     },
     "origin": "llm",
     "on_call": "generate_filler",
-    "on_resolve": "generate_response",
+    "on_resolve": "add_to_context",
     "delivery": {
       "app_message": true
     }

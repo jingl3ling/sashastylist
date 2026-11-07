@@ -1,7 +1,7 @@
 // Public catalog MCP server for the ZooWork stylist. Owner: Arjun.
 // Streamable HTTP, stateless: every POST /mcp carries JSON-RPC and gets a JSON reply (no sessions, no SSE stream).
 // Read-only demo data with no auth, on purpose: the agent connects with permission 'always_allow'.
-// Tools: search_products, get_product over data/catalog/agent-catalog.json (514 in-stock products).
+// Tools: search_products, get_product over data/catalog/agent-catalog.json (in-stock men's and women's products).
 import { readFileSync } from 'node:fs'
 
 const CATALOG = JSON.parse(readFileSync(new URL('../data/catalog/agent-catalog.json', import.meta.url), 'utf8'))
@@ -10,9 +10,9 @@ const BY_ID = new Map(CATALOG.map((p) => [p.id, p]))
 const PHOTOS = 'https://mhalpert.github.io/mens-fashion-barn/data/catalog/'
 
 const SUPPORTED_VERSIONS = ['2025-06-18', '2025-03-26', '2024-11-05']
-const SERVER_INFO = { name: 'mens-fashion-barn-catalog', title: "Men's Fashion Barn catalog", version: '1.0.0' }
+const SERVER_INFO = { name: 'mens-fashion-barn-catalog', title: 'Fashion Barn catalog', version: '1.1.0' }
 const uniq = (xs) => [...new Set(xs)].sort()
-const CATEGORIES = uniq(CATALOG.map((p) => p.category))
+const CATEGORIES_BY = { men: uniq(CATALOG.filter((p) => p.gender !== 'women').map((p) => p.category)), women: uniq(CATALOG.filter((p) => p.gender === 'women').map((p) => p.category)) }
 const STYLES = uniq(CATALOG.map((p) => p.style))
 const OCCASIONS = uniq(CATALOG.flatMap((p) => p.occasions))
 
@@ -21,13 +21,15 @@ const TOOLS = [
     name: 'search_products',
     title: 'Search the catalog',
     description:
-      "Search Men's Fashion Barn's in-stock catalog. All filters are optional and combine with AND. " +
+      "Search Fashion Barn's in-stock catalog (men's and women's departments). All filters are optional and combine with AND. " +
+      "Always pass gender ('men' or 'women') once you know the shopper's department, so looks never mix departments. " +
       "query matches words in the product title, brand, subcategory and colors, so use garment words ('linen suit', 'loafer'), not occasions or places. " +
-      `category is one of: ${CATEGORIES.join(', ')}. style is one of: ${STYLES.join(', ')}. occasion is one of: ${OCCASIONS.join(', ')}. ` +
+      `Men's categories: ${CATEGORIES_BY.men.join(', ')}. Women's categories: ${CATEGORIES_BY.women.join(', ')}. style is one of: ${STYLES.join(', ')}. occasion is one of: ${OCCASIONS.join(', ')}. ` +
       "size returns only items in stock in that size: jacket '40R', dress shirt '15.5 / 32-33', waist '32', shoe '10'. Prices are USD.",
     inputSchema: {
       type: 'object',
       properties: {
+        gender: { type: 'string', enum: ['men', 'women'], description: "The shopper's department" },
         query: { type: 'string', description: "Garment words, e.g. 'linen suit'" },
         category: { type: 'string', description: 'Exact category name from the list above' },
         style: { type: 'string', enum: STYLES },
@@ -44,7 +46,7 @@ const TOOLS = [
   {
     name: 'get_product',
     title: 'Get one product',
-    description: 'Full details for one product by id (e.g. MW-0370): description, colors, in-stock sizes, price, sale flag and photo URL.',
+    description: 'Full details for one product by id (e.g. MW-0370 or WW-0001): gender, description, colors, in-stock sizes, price, sale flag and photo URL.',
     inputSchema: { type: 'object', properties: { id: { type: 'string', description: 'Product id, e.g. MW-0370' } }, required: ['id'], additionalProperties: false },
   },
 ]
@@ -64,6 +66,7 @@ function search(a = {}) {
   const hits = CATALOG.filter((p) => {
     const text = lower(`${p.title} ${p.brand} ${p.subcategory} ${p.colors.join(' ')}`)
     return words.every((w) => text.includes(w))
+      && (!a.gender || p.gender === lower(a.gender))
       && (!a.category || lower(p.category) === lower(a.category) || lower(p.subcategory) === lower(a.category))
       && (!a.style || lower(p.style) === lower(a.style))
       && (!a.occasion || p.occasions.includes(lower(a.occasion)))
@@ -79,7 +82,8 @@ function getProduct({ id } = {}) {
   const p = BY_ID.get(String(id ?? '').trim().toUpperCase())
   if (!p) return null
   const f = FULL.get(p.id)
-  return { ...p, description: f?.description ?? '', details: (f?.details ?? []).slice(0, 8), photo: f?.images?.[0] ? PHOTOS + f.images[0] : null }
+  // Mike's site serves photos as .webp now; the catalog still lists .png/.jpg.
+  return { ...p, description: f?.description ?? '', details: (f?.details ?? []).slice(0, 8), photo: f?.images?.[0] ? PHOTOS + f.images[0].replace(/\.(png|jpe?g)$/i, '.webp') : null }
 }
 
 const text = (obj) => ({ content: [{ type: 'text', text: JSON.stringify(obj) }] })
@@ -104,7 +108,7 @@ function handle(msg) {
         protocolVersion: SUPPORTED_VERSIONS.includes(asked) ? asked : SUPPORTED_VERSIONS[0],
         capabilities: { tools: { listChanged: false } },
         serverInfo: SERVER_INFO,
-        instructions: "Read-only catalog for Men's Fashion Barn. Use search_products to find pieces by slot, then get_product for details. Only in-stock products are listed.",
+        instructions: "Read-only catalog for Fashion Barn (men's and women's). Use search_products with the shopper's gender to find pieces by slot, then get_product for details. Only in-stock products are listed.",
       })
     }
     case 'ping': return ok({})

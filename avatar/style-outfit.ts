@@ -8,6 +8,19 @@ import type { RunRequest, StepStatus, StylistEvent, StylistResult } from "./type
 
 export type StyleOutfitFn = (req: RunRequest) => Promise<StylistResult>;
 
+/** An `error` event from the stylist backend. `message` is the backend's own text. */
+export class StylistRunError extends Error {
+  constructor(readonly backendMessage: string) {
+    super(`stylist: ${backendMessage}`);
+    this.name = "StylistRunError";
+  }
+}
+
+/** The backend asks for the department when neither the request nor memory has it (Jing). */
+export function isDepartmentQuestion(message: string): boolean {
+  return /\bwom[ae]n\W*s?\b/i.test(message) && /\bm[ae]n\W*s?\b/i.test(message) && /department|style from|shopping/i.test(message);
+}
+
 export const DEFAULT_STYLE_OUTFIT_TIMEOUT_MS = 120_000; // Jing's runs take ~35 s; the PAL prompt says "a minute or more"
 
 export interface StylistClientOptions {
@@ -47,7 +60,7 @@ export function stylistClient(opts: StylistClientOptions): StyleOutfitFn {
 
     for await (const ev of readSse(res.body)) {
       if (ev.type === "step") opts.onStep?.({ id: ev.id, label: ev.label, status: ev.status });
-      else if (ev.type === "error") throw new Error(`stylist: ${ev.message}`);
+      else if (ev.type === "error") throw new StylistRunError(ev.message);
       else if (ev.type === "result") {
         const { looks, spoken_summary, lookbook_artifact } = ev;
         return { looks, spoken_summary, lookbook_artifact };

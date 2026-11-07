@@ -3,27 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Men’s Fashion Barn</title>
-<meta name="description" content="A menswear boutique demo: suits, tuxedos, streetwear, athletic and beach clothing under one roof.">
+<title>Fashion Barn</title>
+<meta name="description" content="A fashion boutique demo: women’s and men’s clothing, shoes and accessories under one roof.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=sentient@300,400&display=swap">
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="stylist.css">
-<link rel="stylesheet" href="bag.css">
-<link rel="stylesheet" href="board.css">
+<!-- Our CSS and JS load with ?v=<current minute>, so a browser never runs code more than about a minute old.
+     GitHub Pages lets browsers cache files for 10 minutes, which kept serving stale code after merges. -->
+<script>
+  window.ASSET_V = Math.floor(Date.now() / 60000);
+  ["styles.css", "stylist.css", "bag.css", "board.css"].forEach(function (f) { document.write('<link rel="stylesheet" href="' + f + "?v=" + window.ASSET_V + '">'); });
+</script>
+<noscript><link rel="stylesheet" href="styles.css"></noscript>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="nav">
   <div class="container nav-in">
     <nav class="nav-l" aria-label="Main">
-      <a href="#/shop">Shop</a>
+      <a href="#/shop?g=women">Women</a>
+      <a href="#/shop?g=men">Men</a>
       <a href="#/looks">Looks</a>
       <a href="#/shop?sale=1">Sale</a>
     </nav>
-    <a class="mark" href="#/">Men’s Fashion Barn</a>
+    <a class="mark" href="#/">Fashion Barn</a>
     <div class="nav-r">
       <form class="nav-search" role="search" id="search">
         <label class="visually-hidden" for="q">Search the catalog</label>
@@ -33,7 +37,7 @@
     </div>
   </div>
 </header>
-<main id="main" tabindex="-1"><noscript><div class="container"><p class="note-page">Men’s Fashion Barn needs JavaScript to show the catalog.</p></div></noscript></main>
+<main id="main" tabindex="-1"><noscript><div class="container"><p class="note-page">Fashion Barn needs JavaScript to show the catalog.</p></div></noscript></main>
 <footer class="foot">
   <div class="container">
     <p class="foot-line">Come in and look around. The barn is always open.</p>
@@ -41,8 +45,8 @@
       <nav aria-label="Footer">
         <a href="#/shop">All clothing</a>
         <a href="#/looks">Looks</a>
-        <a href="#/shop?dept=Suits%20%26%20tuxedos">Suits and tuxedos</a>
-        <a href="#/shop?dept=Shorts%20%26%20swim">Shorts and swim</a>
+        <a href="#/shop?g=women&dept=Dresses">Dresses</a>
+        <a href="#/shop?g=men&dept=Suits%20%26%20tuxedos">Suits and tuxedos</a>
       </nav>
       <p class="foot-note">A hackathon demo, not a real shop. Nothing here is for sale. Product photos and copy belong to their brands, and prices, sales and stock are simulated.</p>
     </div>
@@ -73,11 +77,10 @@
   </div>
 </aside>
 <div class="bag-toast" id="bag-toast" role="status" aria-live="polite"></div>
-<script src="app.js"></script>
-<script src="barn.js"></script>
-<script src="bag.js"></script>
-<script src="board.js"></script>
-<!-- Soham's avatar layer (built file, committed under avatar/dist/). -->
-<script type="module" src="../avatar/dist/avatar.js"></script>
+<!-- Same order as before: app.js, barn.js, bag.js, board.js, then Soham's avatar layer (built file, committed under avatar/dist/). -->
+<script>
+  ["app.js", "barn.js", "bag.js", "board.js"].forEach(function (f) { document.write('<script src="' + f + "?v=" + window.ASSET_V + '"><\/script>'); });
+  document.write('<script type="module" src="../avatar/dist/avatar.js?v=' + window.ASSET_V + '"><\/script>');
+</script>
 </body>
 </html>

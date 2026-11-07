@@ -22,6 +22,8 @@ export interface BarnSearchFilters {
   /** Shopper's size for the garment searched: "40R", "15.5 / 32-33", "32", "10". */
   size?: string;
   sale?: boolean;
+  /** Department (barn.js #25): limits results to men's or women's. Ignored by older barn.js. */
+  gender?: "men" | "women";
 }
 
 export type BarnOpenResult = ({ ok: true; colors: string[]; sizes: string[] } & BarnBrief) | { ok: false; error: string };
@@ -65,6 +67,8 @@ export interface RunRequest {
   occasion: string;
   budget_usd: number;
   notes?: string;
+  /** Department to style from. Omit when unknown: the run then ends with an error asking for it. */
+  gender?: "men" | "women";
   rework?: { slot: string; feedback: string };
 }
 
