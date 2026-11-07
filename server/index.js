@@ -2,7 +2,8 @@
 import express from 'express'
 import cors from 'cors'
 import { randomUUID } from 'node:crypto'
-import { RunRequest } from '../contracts/index.mjs'
+import { RunRequest, SwapRequest } from '../contracts/index.mjs'
+import { swap } from './swap.js'
 import { stubRun } from './stub.js'
 
 const MODE = process.env.STYLIST_MODE ?? 'stub'
@@ -56,7 +57,12 @@ async function pump(run, source, deadlineMs) {
 async function execute(run, req) {
   try {
     const { fallbackRun, pickEntry } = await import('./fallback.js')
-    if (MODE === 'cache') {
+    // Curated preset looks answer in under a second, but only when asked for (instant: true)
+    // or forced with STYLIST_INSTANT=always, so the live agent run stays the default.
+    const { pickPreset, presetRun } = await import('./presets.js')
+    if ((req.instant === true || process.env.STYLIST_INSTANT === 'always') && pickPreset(req)) {
+      await pump(run, presetRun(req), 30_000)
+    } else if (MODE === 'cache') {
       await pump(run, fallbackRun(req, { force: true }), 60_000)
     } else if (MODE === 'live') {
       try {
@@ -79,6 +85,14 @@ async function execute(run, req) {
 }
 
 app.get('/health', (_req, res) => res.json({ ok: true, mode: MODE }))
+
+// Swap one item in a look (no agent run). See contracts/index.mjs SwapRequest.
+app.post('/api/stylist/swap', (req, res) => {
+  const parsed = SwapRequest.safeParse(req.body)
+  if (!parsed.success) return res.status(400).json({ ok: false, error: parsed.error.issues.map((i) => i.message).join('; ') })
+  const out = swap(parsed.data)
+  res.status(out.ok ? 200 : 422).json(out)
+})
 
 app.post('/api/stylist/run', (req, res) => {
   const parsed = RunRequest.safeParse(req.body)
