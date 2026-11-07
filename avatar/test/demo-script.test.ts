@@ -30,8 +30,7 @@ function success(r: ToolResultMessage | null): any {
 describe("pal/demo-script.md", () => {
   it("still names the ids, sizes and phrases this test relies on", () => {
     for (const s of ["MW-0374", "40R", "tuxedo outfit", "linen suit", "$1,500", "too formal"]) assert.ok(SCRIPT.includes(s), s);
-    assert.equal(SHOPPER.name, "Alex");
-    assert.equal(SHOPPER.sizes.jacket, "40R");
+    assert.deepEqual(SHOPPER, { shopper_id: "demo-shopper", gender: "men" });
   });
 
   it("runs steps 2–10 end to end", async () => {
@@ -58,7 +57,7 @@ describe("pal/demo-script.md", () => {
     // must ride along. Searched without a size filter, which is how Sasha usually asks.
     out = success(await router.handle(call("search_products", { query: "linen suit", gender: "men" })));
     assert.deepEqual(out.products.map((p: any) => p.id), ["MW-0374"]);
-    out = success(await router.handle(call("search_products", { query: "linen suit", size: SHOPPER.sizes.jacket })));
+    out = success(await router.handle(call("search_products", { query: "linen suit", size: "40R" })));
     assert.deepEqual(out.products.map((p: any) => p.id), ["MW-0374"], "department remembered from the previous search");
     out = success(await router.handle(call("show_product", { product_id: "MW-0374" })));
     assert.equal(out.price, 595);

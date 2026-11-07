@@ -41,6 +41,7 @@ function buildPrompt(req) {
     return [
       `Rework only the "${req.rework.slot}" piece in each look. Feedback: ${req.rework.feedback}.`,
       'Keep every other piece unchanged, stay within budget, and return the full result JSON again.',
+      'Do not use memory.',
     ].join(' ')
   }
   return [
@@ -49,6 +50,7 @@ function buildPrompt(req) {
     req.gender ? `Department: ${req.gender === 'women' ? "women's" : "men's"}.` : '',
     req.notes ? `Notes: ${req.notes}.` : '',
     `Shopper id: ${req.shopper_id}.`,
+    'Do not use memory. Sizes and owned pieces come only from the Notes.',
     'Run the full styling job and finish with the result JSON.',
   ].filter(Boolean).join('\n')
 }

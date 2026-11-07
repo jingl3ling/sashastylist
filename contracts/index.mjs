@@ -8,8 +8,7 @@ export const RunRequest = z.object({
   occasion: z.string().min(1),
   budget_usd: z.number().positive(),
   notes: z.string().optional(),
-  // Department to style from. Optional: if omitted the agent uses the department stored in the
-  // shopper's memory, and the run ends with an error asking for it if neither is known.
+  // Department to style from. Optional: if omitted, the run ends with an error asking for it.
   gender: z.enum(['men', 'women']).optional(),
   // true = answer from the curated preset looks (under a second) when the occasion matches a
   // preset theme (formal wedding, beach wedding, beach vacation) and the budget fits. Falls back
