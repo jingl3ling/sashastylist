@@ -1,0 +1,14 @@
+{
+  "looks": [
+    {
+      "outfit_name": "Amalfi Wedding Guest",
+      "items": [
+        { "product_id": "MW-0001", "slot": "Sport Coat", "why": "Light enough for an outdoor ceremony." },
+        { "closet_item": "Navy chinos", "slot": "Chinos", "why": "Already owned, so the budget goes further." }
+      ],
+      "total_usd": 138
+    }
+  ],
+  "spoken_summary": "Two sentences at most, written to be said aloud.",
+  "lookbook_artifact": null
+}

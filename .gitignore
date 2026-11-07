@@ -14,3 +14,8 @@ data/exclude.json
 
 # Product photos load from Mike's live site
 data/catalog/images/
+
+# Node / Python tooling
+node_modules/
+__pycache__/
+.venv/
