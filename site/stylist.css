@@ -2,7 +2,7 @@
 :root { --stylist-w: 360px; }
 
 .stylist { position: fixed; inset: 0 0 0 auto; width: min(100%, var(--stylist-w)); z-index: var(--z-modal); display: flex; flex-direction: column; gap: var(--space-md);
-  padding: var(--space-md); box-sizing: border-box; background: var(--color-card); border-left: var(--rule-hair) solid var(--color-rule); overflow: hidden;
+  padding: var(--space-md); box-sizing: border-box; background: var(--color-card); border-left: var(--rule-hair) solid var(--color-rule); overflow-y: auto; /* only scrolls on very short screens */
   transform: translateX(100%); transition: transform var(--dur-short) var(--ease-out); }
 .stylist[data-open] { transform: none; box-shadow: var(--shadow-card); }
 .stylist-head { display: flex; align-items: baseline; justify-content: space-between; }
