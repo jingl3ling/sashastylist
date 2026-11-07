@@ -79,7 +79,8 @@ function getProduct({ id } = {}) {
   const p = BY_ID.get(String(id ?? '').trim().toUpperCase())
   if (!p) return null
   const f = FULL.get(p.id)
-  return { ...p, description: f?.description ?? '', details: (f?.details ?? []).slice(0, 8), photo: f?.images?.[0] ? PHOTOS + f.images[0] : null }
+  // Mike's site serves photos as .webp now; the catalog still lists .png/.jpg.
+  return { ...p, description: f?.description ?? '', details: (f?.details ?? []).slice(0, 8), photo: f?.images?.[0] ? PHOTOS + f.images[0].replace(/\.(png|jpe?g)$/i, '.webp') : null }
 }
 
 const text = (obj) => ({ content: [{ type: 'text', text: JSON.stringify(obj) }] })
