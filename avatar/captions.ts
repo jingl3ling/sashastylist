@@ -41,14 +41,33 @@ export function parseUtterance(msg: unknown): Utterance | null {
   return { key: `${speaker}:${id ?? (streaming ? "live" : Math.random().toString(36).slice(2))}`, speaker, text, final };
 }
 
-/** Adds or updates a line: streaming pieces for the same key replace the text in place. */
+const norm = (t: string) => t.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+/**
+ * Adds or updates a line. Tavus can send one spoken line several times (a final copy, another final
+ * copy, a late streaming piece), with different or missing ids, so lines are merged by content:
+ * the same speaker's latest line is updated when it is still in progress, or when the texts match
+ * (one equal to, or the start of, the other). Otherwise the utterance is a new line.
+ */
 export function applyUtterance(lines: CaptionLine[], u: Utterance, max = 200): CaptionLine[] {
-  const i = lines.findIndex((l) => l.key === u.key && !l.final);
-  // A final utterance after its streamed pieces replaces the live line for that speaker.
-  const live = i >= 0 ? i : u.final ? lines.findIndex((l) => l.speaker === u.speaker && !l.final) : -1;
   const next = [...lines];
-  if (live >= 0) next[live] = { ...u };
-  else next.push({ ...u });
+  let last = -1;
+  for (let i = next.length - 1; i >= 0; i--) if (next[i].speaker === u.speaker) { last = i; break; }
+  if (last >= 0) {
+    const l = next[last];
+    const a = norm(l.text), b = norm(u.text);
+    const sameLine = a === b || a.startsWith(b) || b.startsWith(a);
+    const sameKey = l.key === u.key;
+    // Only the speaker's newest turn can be updated: their line must be the last, or followed only by the other speaker's interjection.
+    const recent = last >= next.length - 2;
+    if (recent && (sameLine || sameKey || (!l.final && last === next.length - 1))) {
+      // Keep the longer, finished text: a late partial never shortens or un-finishes a line.
+      const keepOld = l.final && !u.final;
+      next[last] = keepOld ? l : { ...u, text: b.length >= a.length || u.final ? u.text : l.text, final: l.final || u.final };
+      return next.slice(-max);
+    }
+  }
+  next.push({ ...u });
   return next.slice(-max);
 }
 

@@ -42,10 +42,41 @@ describe("captions", () => {
     assert.deepEqual(lines.map((l) => l.text), ["Forty regular."]);
   });
 
+  it("Soham's call: two finals and a late partial of one sentence make one line", () => {
+    const q = "Um, so what do you think about what I'm currently wearing?";
+    let lines: CaptionLine[] = [];
+    lines = applyUtterance(lines, parseUtterance(utt("conversation.utterance", { role: "pal", speech: "What's your name?", inference_id: "s1" }))!);
+    lines = applyUtterance(lines, parseUtterance(utt("conversation.utterance", { role: "user", speech: q, inference_id: "u1" }))!);
+    lines = applyUtterance(lines, parseUtterance(utt("conversation.utterance", { role: "user", speech: q }))!);
+    lines = applyUtterance(lines, parseUtterance(utt("conversation.utterance.streaming", { role: "user", speech: q.slice(0, 30), inference_id: "u9" }))!);
+    lines = applyUtterance(lines, parseUtterance(utt("conversation.utterance", { role: "pal", speech: "Okay, black zip jacket. Solid seven.", inference_id: "s2" }))!);
+    assert.deepEqual(lines.map((l) => [l.speaker, l.text, l.final]), [
+      ["Sasha", "What's your name?", true],
+      ["You", q, true],
+      ["Sasha", "Okay, black zip jacket. Solid seven.", true],
+    ]);
+  });
+
+  it("a repeat that arrives just after the other speaker starts still merges", () => {
+    let lines: CaptionLine[] = [];
+    lines = applyUtterance(lines, parseUtterance(utt("conversation.utterance", { role: "user", speech: "Forty regular." }))!);
+    lines = applyUtterance(lines, parseUtterance(utt("conversation.utterance.streaming", { role: "pal", speech: "Got it", inference_id: "p" }))!);
+    lines = applyUtterance(lines, parseUtterance(utt("conversation.utterance", { role: "user", speech: "Forty regular." }))!);
+    assert.deepEqual(lines.map((l) => l.text), ["Forty regular.", "Got it"]);
+  });
+
+  it("the same words in a later turn are a new line", () => {
+    let lines: CaptionLine[] = [];
+    for (const [role, speech] of [["user", "Yes."], ["pal", "In the bag."], ["user", "Okay."], ["pal", "Anything else?"], ["user", "Yes."]]) {
+      lines = applyUtterance(lines, parseUtterance(utt("conversation.utterance", { role, speech }))!);
+    }
+    assert.equal(lines.length, 5);
+  });
+
   it("keeps at most the last 200 lines", () => {
     let lines: CaptionLine[] = [];
-    for (let i = 0; i < 205; i++) lines = applyUtterance(lines, parseUtterance(utt("conversation.utterance", { role: "user", speech: `line ${i}` }))!);
+    for (let i = 0; i < 205; i++) lines = applyUtterance(lines, parseUtterance(utt("conversation.utterance", { role: "user", speech: `line ${i} end` }))!);
     assert.equal(lines.length, 200);
-    assert.equal(lines[0].text, "line 5");
+    assert.equal(lines[0].text, "line 5 end");
   });
 });

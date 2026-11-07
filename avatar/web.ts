@@ -107,6 +107,8 @@ let ccOn = (() => {
   }
 })();
 let loggedUtterance = false;
+/** The last 50 raw utterance messages, for debugging caption issues: copy(Avatar.rawUtterances) in the console. */
+const rawUtterances: unknown[] = [];
 
 function transcriptPanel(): HTMLDetailsElement | null {
   const el = slot();
@@ -174,6 +176,8 @@ function renderCaptions() {
 function onCaption(data: unknown) {
   const type = String((data as { event_type?: string })?.event_type ?? "");
   if (!type.startsWith("conversation.utterance")) return;
+  rawUtterances.push(data);
+  if (rawUtterances.length > 50) rawUtterances.shift();
   if (!loggedUtterance) {
     loggedUtterance = true;
     console.log("[avatar] first utterance payload (captions read this shape):", data);
@@ -396,7 +400,7 @@ export function shopperError(forSasha: string): string {
 
 function boot() {
   render();
-  window.Avatar = { router, start, end, log, backend, mode, caption: onCaption, get captions() { return captions; }, get state() { return state; } };
+  window.Avatar = { router, start, end, log, backend, mode, caption: onCaption, rawUtterances, get captions() { return captions; }, get state() { return state; } };
   if (params.has("avatar_debug")) mountDebugPanel(router, log);
   console.log(`[avatar] ready: backend ${backend}, style_outfit ${mode}${instant ? ", instant presets ON" : ""}`);
 }
