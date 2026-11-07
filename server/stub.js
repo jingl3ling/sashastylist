@@ -2,15 +2,15 @@
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
 const STEPS = [
-  ['memory', 'Recalling your sizes and closet'],
+  ['brief', 'Reading your brief'],
   ['research', 'Researching the occasion and current trends'],
   ['jacket', 'Searching the catalog: jackets'],
   ['shirt', 'Searching the catalog: shirts'],
   ['trousers', 'Searching the catalog: trousers'],
   ['shoes', 'Searching the catalog: shoes'],
-  ['build', 'Building three looks from your closet and the shop'],
+  ['build', 'Building three looks from the catalog'],
   ['check', 'Checking budget, sizes and formality'],
-  ['save', 'Saving what I learned and publishing your lookbook'],
+  ['save', 'Publishing your lookbook'],
 ]
 
 export async function* stubRun(req, { fast = false } = {}) {
