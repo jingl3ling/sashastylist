@@ -19,6 +19,7 @@ if (!apiKey) {
 }
 
 const API = "https://tavusapi.com/v2";
+const MODEL = "tavus-gpt-terra"; // tavus-gemma skipped style_outfit calls on live calls.
 const idFile = join(here, "pal-id.txt");
 
 const pal = {
@@ -81,10 +82,11 @@ if (existsSync(idFile)) {
     path: `/layers/${layer}`,
     value,
   }));
-  await call("PATCH", `/pals/${palId}`, [...fields, ...layers]);
+  const model = { op: "add", path: "/layers/llm/model", value: MODEL };
+  await call("PATCH", `/pals/${palId}`, [...fields, ...layers, model]);
   console.log(`Updated PAL. pal_id: ${palId}`);
 } else {
-  const created = await call("POST", "/pals", pal);
+  const created = await call("POST", "/pals", { ...pal, layers: { ...pal.layers, llm: { model: MODEL } } });
   writeFileSync(idFile, `${created.pal_id}\n`);
   console.log(`Created PAL. pal_id: ${created.pal_id}`);
 }
