@@ -65,16 +65,19 @@ async function call(method, path, body) {
 
 if (existsSync(idFile)) {
   const palId = readFileSync(idFile, "utf8").trim();
-  // JSON Patch "add" replaces a value that already exists.
-  await call(
-    "PATCH",
-    `/pals/${palId}`,
-    ["pal_name", "system_prompt", "default_face_id", "layers"].map((field) => ({
-      op: "add",
-      path: `/${field}`,
-      value: pal[field],
-    })),
-  );
+  // JSON Patch "add" replaces a value that already exists. Layers are patched one
+  // at a time so anything else on the PAL, like the llm layer, is left alone.
+  const fields = ["pal_name", "system_prompt", "default_face_id"].map((field) => ({
+    op: "add",
+    path: `/${field}`,
+    value: pal[field],
+  }));
+  const layers = Object.entries(pal.layers).map(([layer, value]) => ({
+    op: "add",
+    path: `/layers/${layer}`,
+    value,
+  }));
+  await call("PATCH", `/pals/${palId}`, [...fields, ...layers]);
   console.log(`Updated PAL. pal_id: ${palId}`);
 } else {
   const created = await call("POST", "/pals", pal);
