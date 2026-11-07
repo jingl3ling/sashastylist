@@ -187,7 +187,7 @@ describe("style_outfit", () => {
     const shown = calls.find((c) => c[0] === "showLooks")![1][0] as StylistResult;
     assert.equal(shown.looks.length, 3);
     assert.equal(out(r).looks.length, 3);
-    for (const look of out(r).looks) for (const it of look.items) assert.equal(it.why, undefined);
+    for (const look of out(r).looks) for (const it of look.items) assert.ok(it.why, "Sasha needs the reason to explain the pairing");
   });
 
   it("sends rework when both rework fields are given", async () => {
@@ -302,8 +302,29 @@ describe("style_outfit", () => {
     await new Promise((r) => setTimeout(r, 20));
     const text = pushed[0].properties.text;
     assert.match(text, /Suit is product_id MW-0374, size 40R/);
-    assert.match(text, /Sunglasses is product_id MW-0158;/, "no size field, no size words");
+    assert.match(text, /Sunglasses is product_id MW-0158, why: w;/, "no size field, no size words");
     assert.match(text, /use the size listed here/);
+  });
+
+  it("fits three full looks with reasons in one message, with the instructions intact", async () => {
+    const pushed: RespondMessage[] = [];
+    const item = (n: number) => ({ product_id: `MW-0${n}`, slot: "Pocket Square", size: "15.5 / 32-33", why: "x".repeat(200) });
+    const look = (n: number) => ({ outfit_name: "A very long outfit name for testing", total_usd: 999.99, items: [1, 2, 3, 4, 5, 6].map((i) => item(100 + n * 10 + i)) });
+    const { router } = setup({
+      styleOutfitMode: "background",
+      styleOutfit: async () => ({ looks: [look(1), look(2), look(3)], spoken_summary: "s".repeat(300) }),
+    });
+    await router.handle(call("style_outfit", { occasion: "w", budget_usd: 800 }), (m) => pushed.push(m));
+    await new Promise((r) => setTimeout(r, 20));
+    const text = pushed[0].properties.text;
+    assert.ok(byteLength(pushed[0]) < MAX_APP_MESSAGE_BYTES, `${byteLength(pushed[0])}B`);
+    assert.match(text, /use the size listed here/);
+    assert.match(text, /why the pieces in look 1 work together/);
+    assert.match(text, /Look 1/);
+    // Every product id that made it into the message is whole (no "MW-01…" cut mid-id).
+    for (const id of text.match(/MW-\d+/g) ?? []) assert.match(id, /^MW-0\d{3}$/, id);
+    assert.ok(!text.endsWith("…"), "shrunk by whole pieces, not cut mid-text");
+    assert.match(text, /dollars: .*\.$/, "ends on a complete look");
   });
 
   it("instant only for the first look of a call; later requests run live", async () => {

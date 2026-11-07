@@ -100,9 +100,10 @@ describe("stylist result text", () => {
     const { stylistResultText } = await import("../router");
     const text = stylistResultText({
       spoken_summary: "Two looks.",
-      looks: [{ outfit_name: "Linen", total_usd: 595, items: [{ product_id: "MW-0374", slot: "Suit" }, { closet_item: "Navy chinos", slot: "Chinos" }] }],
+      looks: [{ outfit_name: "Linen", total_usd: 595, items: [{ product_id: "MW-0374", slot: "Suit", why: "Linen breathes in the heat." }, { closet_item: "Navy chinos", slot: "Chinos" }] }],
     });
     assert.match(text, /MW-0374/);
+    assert.match(text, /why: Linen breathes/);
     assert.match(text, /Navy chinos/);
     assert.doesNotMatch(text, /[\[\]]/);
   });

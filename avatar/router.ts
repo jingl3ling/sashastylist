@@ -11,6 +11,7 @@ export const TRIM_THRESHOLD_BYTES = 3500;
 /** Hard cap per conversation across the bag and every style_outfit budget (Sasha's prompt). */
 export const DEFAULT_SPEND_LIMIT_USD = 10_000;
 const SHORT_NAME_CHARS = 40;
+const WHY_CHARS = 90; // Enough for Sasha to explain a pairing, and three looks still fit in one message.
 
 // ---- Tavus message shapes ----
 
@@ -420,7 +421,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       void run().then((r) => {
         const text =
           r.status === "success"
-            ? stylistResultText(r.output as ReturnType<typeof compactStylist>)
+            ? fitStylistText(r.output as ReturnType<typeof compactStylist>, ctx.conversationId, threshold)
             : `STYLIST RESULT, not said by the shopper. ${r.output}`;
         const msg = fitRespond(ctx.conversationId, text, threshold);
         opts.onLog?.({ dir: "info", text: `style_outfit pushed ${r.status} via conversation.respond (${byteLength(msg)}B)` });
@@ -472,13 +473,40 @@ export function stylistResultText(o: ReturnType<typeof compactStylist>): string 
     const items = (l.items ?? [])
       .map((it) =>
         "product_id" in it
-          ? `${it.slot} is product_id ${it.product_id}${"size" in it && it.size ? `, size ${it.size}` : ""}`
-          : `${it.slot} is the shopper's own ${it.closet_item}`,
+          ? `${it.slot} is product_id ${it.product_id}${"size" in it && it.size ? `, size ${it.size}` : ""}${"why" in it && it.why ? `, why: ${it.why}` : ""}`
+          : `${it.slot} is the shopper's own ${it.closet_item}${"why" in it && it.why ? `, why: ${it.why}` : ""}`,
       )
       .join("; ");
     return `Look ${n + 1}, ${l.outfit_name}, ${l.total_usd} dollars: ${items}.`;
   });
-  return `STYLIST RESULT, not said by the shopper. The looks are on the outfit board now. spoken_summary: ${o.spoken_summary} ${looks.join(" ")} Say spoken_summary in your own voice and ask which look the shopper likes. When adding an item to the bag, use the size listed here.`;
+  return `STYLIST RESULT, not said by the shopper. The looks are on the outfit board now. Say spoken_summary in your own voice, then say in two or three sentences why the pieces in look 1 work together, using the why notes, and ask which look the shopper likes. When adding an item to the bag, use the size listed here. spoken_summary: ${o.spoken_summary} ${looks.join(" ")}`;
+}
+
+/**
+ * The looks message, shrunk by whole pieces when it's too big: first the why notes of looks 2 and 3,
+ * then whole looks from the end (look 1 always stays). Never cuts mid-item, so a product id can't be
+ * truncated into a wrong one. fitRespond's character trim is only a last resort after this.
+ */
+export function fitStylistText(o: ReturnType<typeof compactStylist>, conversationId: string, threshold: number): string {
+  const size = (t: string) => byteLength(fitRespondMessage(conversationId, t));
+  let cur = o;
+  let text = stylistResultText(cur);
+  if (size(text) <= threshold) return text;
+  cur = { ...cur, looks: cur.looks.map((l, i) => (i === 0 ? l : { ...l, items: l.items.map(({ why, ...it }: any) => it) })) };
+  text = stylistResultText(cur);
+  while (size(text) > threshold && cur.looks.length > 1) {
+    cur = { ...cur, looks: cur.looks.slice(0, -1) };
+    text = stylistResultText(cur);
+  }
+  if (size(text) > threshold) {
+    cur = { ...cur, looks: cur.looks.map((l) => ({ ...l, items: l.items.map(({ why, ...it }: any) => it) })) };
+    text = stylistResultText(cur);
+  }
+  return text;
+}
+
+function fitRespondMessage(conversationId: string, text: string): RespondMessage {
+  return { message_type: "conversation", event_type: "conversation.respond", conversation_id: conversationId, properties: { text } };
 }
 
 function compactStylist(res: StylistResult) {
@@ -489,8 +517,8 @@ function compactStylist(res: StylistResult) {
       total_usd: l.total_usd,
       items: (l.items ?? []).map((it) =>
         it.product_id
-          ? { product_id: it.product_id, slot: it.slot, ...(it.size ? { size: it.size } : {}) }
-          : { closet_item: clip(it.closet_item ?? "", SHORT_NAME_CHARS), slot: it.slot },
+          ? { product_id: it.product_id, slot: it.slot, ...(it.size ? { size: it.size } : {}), ...(it.why ? { why: clip(it.why, WHY_CHARS) } : {}) }
+          : { closet_item: clip(it.closet_item ?? "", SHORT_NAME_CHARS), slot: it.slot, ...(it.why ? { why: clip(it.why, WHY_CHARS) } : {}) },
       ),
     })),
   };
