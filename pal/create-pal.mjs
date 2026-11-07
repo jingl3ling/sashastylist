@@ -22,12 +22,12 @@ const API = "https://tavusapi.com/v2";
 const idFile = join(here, "pal-id.txt");
 
 const pal = {
-  pal_name: "Sasha - Men's Fashion Barn",
+  pal_name: "Sasha - Fashion Barn",
   system_prompt: readFileSync(join(here, "system-prompt.md"), "utf8"),
   pipeline_mode: "full",
   // Spoken as soon as the shopper joins, so Sasha never waits for a hello.
   greeting:
-    "Hey, I'm Sasha, your AI stylist here at Men's Fashion Barn. Here's the deal: I get to know you, check out what you've got on, and then my styling agent builds you looks from our racks. What's your name?",
+    "Hey, I'm Sasha, your AI stylist here at Fashion Barn. Here's the deal: I get to know you, check out what you've got on, and then my styling agent builds you looks from our racks. What's your name?",
   default_face_id: "r347a65434bb", // Ruby, stock Phoenix-4.5 face
   layers: {
     perception: {
