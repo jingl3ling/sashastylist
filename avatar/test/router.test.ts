@@ -303,6 +303,27 @@ describe("stylist client (Jing's backend)", () => {
     await assert.rejects(stylistClient({ baseUrl: "http://x", fetchImpl: fakeFetch([]).f })(opts), /without a result/);
   });
 
+  it("closes the stream right after the result, ignoring anything sent later", async () => {
+    let cancelled = false;
+    const enc = new TextEncoder();
+    const body = new ReadableStream<Uint8Array>({
+      start(c) {
+        c.enqueue(enc.encode(`data: ${JSON.stringify(result)}\n\n`));
+        // Server keeps the stream open (e.g. pings); the client must not wait for it.
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    const f = (async (url: string) =>
+      url.endsWith("/api/stylist/run")
+        ? new Response(JSON.stringify({ run_id: "r1" }), { status: 202 })
+        : new Response(body, { status: 200 })) as typeof fetch;
+    const r = await stylistClient({ baseUrl: "http://x", fetchImpl: f })({ shopper_id: "s", conversation_id: "c", occasion: "o", budget_usd: 1 });
+    assert.equal(r.looks.length, 1);
+    assert.equal(cancelled, true);
+  });
+
   it("readSse handles CRLF and multi-line data", async () => {
     const body = new Response('data: {"type":"step",\r\ndata: "id":"a","label":"l","status":"start"}\r\n\r\n').body!;
     const got = [];
@@ -326,7 +347,7 @@ describe("tools.json", () => {
   it("matches Sasha's prompt: names, on_call/on_resolve, required args", () => {
     const tools = JSON.parse(readFileSync(new URL("../tools.json", import.meta.url), "utf8"));
     const want: Record<string, [string, string, string[]]> = {
-      search_products: ["silent", "generate_response", []],
+      search_products: ["generate_filler", "generate_response", []],
       show_product: ["silent", "generate_response", ["product_id"]],
       add_to_bag: ["silent", "generate_response", ["product_id"]],
       style_outfit: ["generate_filler", "generate_response", ["occasion", "budget_usd"]],

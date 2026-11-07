@@ -15,6 +15,7 @@ import { mountDebugPanel } from "./debug-panel";
 import { createRouter, type RouterLogEntry, type ToolCallMessage } from "./router";
 import { parseBudget, stylistClient } from "./style-outfit";
 import type { Barn } from "./types";
+import { createSpeechTracker, createWaitTalk } from "./wait-talk";
 
 const RAILWAY = "https://backend-production-6d9d.up.railway.app";
 
@@ -40,15 +41,39 @@ const mode = (params.get("avatar_mode") as AvatarConfig["styleOutfitMode"]) ?? c
 const barn = (): Barn | undefined => window.Barn;
 const log: RouterLogEntry[] = [];
 
+// Who's talking, so wait talk never cuts anyone off.
+const speech = createSpeechTracker();
+
+const waitTalk = createWaitTalk({
+  say: (text) => {
+    if (conversationId) send({ message_type: "conversation", event_type: "conversation.respond", conversation_id: conversationId, properties: { text } });
+  },
+  quietMs: (now) => speech.quietMs(now),
+});
+
+const runStylist = stylistClient({
+  baseUrl: backend,
+  onStart: () => barn()?.resetFeed(),
+  onStep: (s) => {
+    barn()?.addFeedStep(s);
+    if (s.status === "start") waitTalk.step(s.label);
+  },
+});
+
 const router = createRouter({
   bridge: barn,
   shopperId: cfg.shopperId,
   styleOutfitMode: mode,
-  styleOutfit: stylistClient({
-    baseUrl: backend,
-    onStart: () => barn()?.resetFeed(),
-    onStep: (s) => barn()?.addFeedStep(s),
-  }),
+  styleOutfit: async (req) => {
+    waitTalk.start(Date.now());
+    const timer = setInterval(() => waitTalk.tick(Date.now()), 1_000);
+    try {
+      return await runStylist(req);
+    } finally {
+      clearInterval(timer);
+      waitTalk.stop();
+    }
+  },
   onLog: (e) => {
     log.push(e);
     if (log.length > 200) log.shift();
@@ -141,6 +166,7 @@ function send(msg: unknown) {
 
 async function onAppMessage(ev?: DailyEventObjectAppMessage) {
   if (!ev) return;
+  speech.track(ev.data, Date.now());
   const result = await router.handle(ev.data, send);
   if (result) send(result);
 }

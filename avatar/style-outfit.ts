@@ -86,7 +86,9 @@ export async function* readSse(body: ReadableStream<Uint8Array>): AsyncGenerator
       if (done) return;
     }
   } finally {
-    reader.releaseLock();
+    // Close the connection as soon as we stop reading (result, error, or the caller bailing).
+    // fetch never reconnects, so the server can't replay the run (Jing's contract note).
+    await reader.cancel().catch(() => {});
   }
 }
 
