@@ -178,12 +178,19 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
   const log = opts.logger ?? ((line: string) => console.log(line));
   const threshold = opts.trimThresholdBytes ?? TRIM_THRESHOLD_BYTES;
   let styleRunning = false;
+  /** Department last used in this conversation, so a forgotten gender arg doesn't flip departments mid-call. */
+  const departments = new Map<string, "men" | "women">();
+  const department = (ctx: HandlerContext, given: unknown) => {
+    const g = normalizeGender(typeof given === "string" ? given : undefined);
+    if (g) departments.set(ctx.conversationId, g);
+    return g ?? departments.get(ctx.conversationId);
+  };
   /** Budgets of the outfits built so far, keyed by occasion (a rework or a retry of the same occasion replaces, not adds). */
   const outfitBudgets = new Map<string, number>();
   const occasionKey = (o: string) => o.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
   return {
-    async search_products(raw, barn) {
+    async search_products(raw, barn, ctx) {
       // Sasha's prompt calls the text filter "q"; the tool schema calls it "query". Accept both.
       if (raw && typeof raw === "object" && (raw as any).query == null && (raw as any).q != null) raw = { ...raw, query: (raw as any).q };
       const v = validate(raw, {
@@ -195,6 +202,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         max_price: { type: "number" },
         size: { type: "string" },
         on_sale: { type: "boolean" },
+        gender: { type: "string" },
       });
       if (!v.ok) return err(v.error);
       const a = v.args;
@@ -206,6 +214,8 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
       if (a.color) filters.color = a.color as string;
       if (a.max_price !== undefined) filters.max_price = a.max_price as number;
       if (a.size) filters.size = a.size as string;
+      const g = department(ctx, a.gender);
+      if (g) filters.gender = g;
       if (a.on_sale) filters.sale = true;
       const results = (await barn.search(filters)) ?? [];
       for (const p of results) prices.set(p.id, p.price);
@@ -311,7 +321,7 @@ function makeHandlers(opts: RouterOptions, prices: Map<string, number>): Record<
         return early("Looks are still being built. Don't call style_outfit again; tell the shopper it's still cooking.");
       }
       const a = v.args;
-      const gender = normalizeGender(a.gender as string | undefined);
+      const gender = department(ctx, a.gender);
       const asked = a.budget_usd as number;
       if (!(asked > 0)) return early("The budget has to be more than zero. Ask the shopper what they want to spend.");
       // $10,000 per conversation across all outfits and the bag. Items bought from a look count

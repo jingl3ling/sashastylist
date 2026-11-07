@@ -54,8 +54,12 @@ describe("pal/demo-script.md", () => {
     for (const p of out.products) assert.match(p.title, /tuxedo/i);
 
     // 4. "Sure, show me." -> "linen suit", then open MW-0374 ($595).
-    out = success(await router.handle(call("search_products", { query: "linen suit", size: SHOPPER.sizes.jacket })));
+    // With the women's catalog (#25), "linen suit" also matches women's items, so the department
+    // must ride along. Searched without a size filter, which is how Sasha usually asks.
+    out = success(await router.handle(call("search_products", { query: "linen suit", gender: "men" })));
     assert.deepEqual(out.products.map((p: any) => p.id), ["MW-0374"]);
+    out = success(await router.handle(call("search_products", { query: "linen suit", size: SHOPPER.sizes.jacket })));
+    assert.deepEqual(out.products.map((p: any) => p.id), ["MW-0374"], "department remembered from the previous search");
     out = success(await router.handle(call("show_product", { product_id: "MW-0374" })));
     assert.equal(out.price, 595);
     assert.ok(out.sizes_in_stock.includes("40R"), "Sasha checks Alex's size against this list (Mike #4)");
@@ -65,7 +69,7 @@ describe("pal/demo-script.md", () => {
     out = success(await router.handle(call("style_outfit", { ...brief, response_to_user: "Working on it." })));
     assert.equal(out.looks.length, 3);
     assert.ok(out.spoken_summary);
-    assert.deepEqual(runs[0], { shopper_id: "demo-shopper", conversation_id: "demo-call", ...brief });
+    assert.deepEqual(runs[0], { shopper_id: "demo-shopper", conversation_id: "demo-call", ...brief, gender: "men" }, "department carried from the searches");
     assert.ok(fb.calls.some((c) => c[0] === "showLooks"));
 
     // 7. "Those shoes are too formal." -> same occasion and budget, swap only the shoes.

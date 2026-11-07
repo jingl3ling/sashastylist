@@ -68,6 +68,27 @@ describe("search_products", () => {
     assert.deepEqual(calls[0], ["search", [{ q: "linen suit" }]]);
   });
 
+  it("passes gender to Barn.search and remembers it for the rest of the call", async () => {
+    const { router, calls } = setup();
+    ok(await router.handle(call("search_products", { query: "linen suit", gender: "Men's" })));
+    assert.deepEqual(calls.at(-1), ["search", [{ q: "linen suit", gender: "men" }]]);
+    ok(await router.handle(call("search_products", { query: "loafer" })));
+    assert.deepEqual(calls.at(-1), ["search", [{ q: "loafer", gender: "men" }]], "forgotten gender falls back to the call's department");
+    ok(await router.handle(call("search_products", { query: "dress", gender: "women" })));
+    assert.deepEqual(calls.at(-1), ["search", [{ q: "dress", gender: "women" }]], "an explicit answer switches it");
+  });
+
+  it("keeps departments separate per conversation, and style_outfit uses the remembered one", async () => {
+    const seen: RunRequest[] = [];
+    const { router, calls } = setup({ styleOutfit: async (req) => (seen.push(req), mockStylist([], 0)(req)) });
+    ok(await router.handle(call("search_products", { query: "suit", gender: "men" })));
+    ok(await router.handle(call("style_outfit", { occasion: "wedding", budget_usd: 800 })));
+    assert.equal(seen[0].gender, "men");
+    const other = await router.handle(call("search_products", { query: "suit" }, "conv-2"));
+    assert.ok(other);
+    assert.deepEqual(calls.at(-1), ["search", [{ q: "suit" }]]);
+  });
+
   it("hints when nothing matches", async () => {
     const { router } = setup();
     const r = await router.handle(call("search_products", { query: "zzzz" }));
@@ -211,8 +232,9 @@ describe("style_outfit", () => {
   it("sends gender only when it's men or women, normalising loose words", async () => {
     const seen: RunRequest[] = [];
     const { router } = setup({ styleOutfit: async (req) => (seen.push(req), mockStylist([], 0)(req)) });
+    // Separate conversations, so the remembered department doesn't carry over between cases.
     for (const g of ["women", "Men's", "female", "unknown", ""]) {
-      await router.handle(call("style_outfit", { occasion: `o-${g}`, budget_usd: 100, gender: g }));
+      await router.handle(call("style_outfit", { occasion: `o-${g}`, budget_usd: 100, gender: g }, `conv-${g || "none"}`));
     }
     assert.deepEqual(seen.map((r) => r.gender), ["women", "men", "women", undefined, undefined]);
     assert.ok(!("gender" in seen[3]), "unknown department is left out of the request");

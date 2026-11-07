@@ -1,17 +1,25 @@
 [
   {
     "name": "search_products",
-    "description": "Search the Men's Fashion Barn catalog and filter the product grid the shopper is looking at. Call it for any browsing request, and right after the shopper describes an event so the page starts moving. Fill in only the filters the shopper's words support. max_price is a per-item limit, never an outfit budget. Returns up to 5 matches (id, title, brand, price); name two at most, the rest are on screen.",
+    "description": "Search the Fashion Barn catalog (men's and women's departments) and filter the product grid the shopper is looking at. Call it for any browsing request, and right after the shopper describes an event so the page starts moving. Fill in only the filters the shopper's words support. max_price is a per-item limit, never an outfit budget. Returns up to 5 matches (id, title, brand, price); name two at most, the rest are on screen.",
     "parameters": {
       "type": "object",
       "properties": {
+        "gender": {
+          "type": "string",
+          "enum": [
+            "men",
+            "women"
+          ],
+          "description": "Which department to search: 'men' or 'women'. Always pass it once you know it; without it results mix both departments. Never decide it from the camera."
+        },
         "query": {
           "type": "string",
           "description": "Garment words matched against product names only, e.g. 'linen suit', 'loafers', 'oxford shirt'. Never put the occasion or place here ('wedding', 'Italy', 'beach'): that matches nothing. Use department, style and color for the rest."
         },
         "department": {
           "type": "string",
-          "description": "One of: 'Suits & tuxedos', 'Shirts & tees', 'Knits & sweats', 'Trousers & denim', 'Shorts & swim', 'Outerwear', 'Shoes', 'Ties & formal extras', 'Accessories'. Loose names like 'suits' or 'shoes' also work."
+          "description": "Men's departments: 'Suits & tuxedos', 'Shirts & tees', 'Knits & sweats', 'Trousers & denim', 'Shorts & swim', 'Outerwear', 'Shoes', 'Ties & formal extras', 'Accessories'. Women's departments: 'Dresses', 'Tops', 'Bottoms', 'Outerwear', 'Activewear', 'Swim', 'Shoes', 'Bags', 'Jewelry & accessories'. Loose names like 'suits' or 'shoes' also work."
         },
         "style": {
           "type": "string",

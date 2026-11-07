@@ -24,6 +24,7 @@ export function fakeBarn() {
         (p) =>
           (!f.max_price || p.simulated.price <= f.max_price) &&
           (!f.style || p.style.toLowerCase() === f.style.toLowerCase()) &&
+          (!f.gender || (p.gender ?? "men") === f.gender) && // no gender field = men's-only catalog
           (!f.size || p.simulated.inventory[f.size] > 0 || p.size_type === "one") &&
           (!f.color || (p.colors.join(" ") + p.title).toLowerCase().includes(f.color.toLowerCase())) &&
           words.every((w) => (p.title + " " + p.brand + " " + p.subcategory + " " + p.colors.join(" ")).toLowerCase().includes(w)),
