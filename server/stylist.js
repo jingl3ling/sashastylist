@@ -68,7 +68,7 @@ export function extractJson(text) {
 }
 
 // Drops unknown product_ids and recomputes totals from catalog prices.
-export function validate(result) {
+export function validate(result, budget) {
   const warnings = []
   const looks = result.looks
     .map((look) => {
@@ -82,6 +82,12 @@ export function validate(result) {
       return { ...look, items, total_usd: catalog ? Math.round(total * 100) / 100 : look.total_usd }
     })
     .filter((look) => look.items.length > 0)
+    .filter((look) => {
+      // The agent is told to stay in budget but is not trusted on arithmetic.
+      if (!budget || !catalog || look.total_usd <= budget) return true
+      warnings.push(`Dropped "${look.outfit_name}": $${look.total_usd} is over the $${budget} budget`)
+      return false
+    })
   if (!catalog) warnings.push('Catalog not loaded; product ids and totals were not validated')
   return { ...result, looks, warnings }
 }
@@ -138,7 +144,7 @@ export async function* liveRun(req) {
     console.error('Unreadable stylist result. Final text:\n', finalText.slice(0, 1500), '\nIssues:', parsed.error?.issues?.slice(0, 3))
     throw new Error('Stylist returned an unreadable result')
   }
-  const result = validate(parsed.data)
-  if (result.looks.length === 0) throw new Error('No valid looks after catalog validation')
+  const result = validate(parsed.data, req.budget_usd)
+  if (result.looks.length === 0) throw new Error(`No valid looks within budget. ${result.warnings.join(' ')}`.trim())
   yield { type: 'result', ...result, elapsed_ms: Date.now() - started }
 }

@@ -55,6 +55,10 @@ Rules:
 - Every item has a `slot` (Jacket, Shirt, Trousers, Shoes, Accessory) and a one-sentence `why`.
 - `total_usd` is the sum of catalog prices for the products only; closet items cost nothing.
 - Return three looks unless the brief says otherwise. Each look must fit the budget.
+- Before answering, add up the `price` of every product in each look with `exec` (for example
+  with `jq`) and confirm the sum is at or under the budget. Do not estimate in your head. If a look
+  is over, swap the most expensive piece for a cheaper one and add it up again. A look over budget
+  is a failed look, and the server drops it.
 - Never invent a product id. If nothing fits a slot, say so in `spoken_summary`.
 
 ## Reworking one piece
