@@ -80,6 +80,7 @@
 <!-- Same order as before: app.js, barn.js, bag.js, board.js, then Soham's avatar layer (built file, committed under avatar/dist/). -->
 <script>
   ["app.js", "barn.js", "bag.js", "board.js"].forEach(function (f) { document.write('<script src="' + f + "?v=" + window.ASSET_V + '"><\/script>'); });
+  document.write('<script src="config.js?v=' + window.ASSET_V + '"><\/script>'); // self-hosted: points the avatar at this server
   document.write('<script type="module" src="../avatar/dist/avatar.js?v=' + window.ASSET_V + '"><\/script>');
 </script>
 </body>

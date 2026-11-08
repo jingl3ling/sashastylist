@@ -9,7 +9,9 @@ import { stubRun } from './stub.js'
 
 const MODE = process.env.STYLIST_MODE ?? 'stub'
 const PORT = Number(process.env.PORT ?? 8787)
-const ORIGINS = ['https://pillaiarjun.github.io', /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/]
+// Extra browser origins that may call the API, comma-separated (for a store hosted elsewhere, e.g. GitHub Pages).
+const EXTRA_ORIGINS = (process.env.ALLOWED_ORIGINS ?? '').split(',').map((o) => o.trim().replace(/\/+$/, '')).filter(Boolean)
+const ORIGINS = [...EXTRA_ORIGINS, /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/]
 
 const app = express()
 app.use(cors({ origin: ORIGINS }))
@@ -139,5 +141,25 @@ try {
 const { mountMcp } = await import('./mcp.js')
 mountMcp(app)
 console.log('catalog MCP mounted at /mcp')
+
+// Optional: serve the store from this same server (SERVE_SITE=1), so one Railway service runs everything
+// and the avatar talks to its own origin. Only the store, the built avatar and the catalog JSON are
+// exposed, never the server code or env files.
+if (process.env.SERVE_SITE === '1') {
+  app.set('trust proxy', 1)
+  const root = new URL('..', import.meta.url).pathname
+  app.get('/site/config.js', (req, res) => {
+    const origin = `${(req.get('x-forwarded-proto') ?? req.protocol).split(',')[0]}://${req.get('host')}`
+    res
+      .type('application/javascript')
+      .set('Cache-Control', 'no-store')
+      .send(`window.AVATAR_CONFIG = Object.assign({ backend: ${JSON.stringify(origin)} }, window.AVATAR_CONFIG);`)
+  })
+  app.use('/site', express.static(root + 'site'))
+  app.use('/avatar/dist', express.static(root + 'avatar/dist'))
+  app.use('/data/catalog', express.static(root + 'data/catalog'))
+  app.get('/', (_req, res) => res.redirect('/site/'))
+  console.log('serving the store at /site/')
+}
 
 app.listen(PORT, () => console.log(`stylist backend on :${PORT} (mode: ${MODE})`))
