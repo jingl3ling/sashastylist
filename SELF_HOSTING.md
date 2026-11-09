@@ -71,7 +71,21 @@ The MCP route must stay public and unauthenticated, because ZooWork calls it fro
 - `/health` says `live`.
 - Type a brief in the stylist box ("beach wedding, about $800"); the feed streams real steps and looks appear.
 - Start a video call and say the same. Only one call at a time (Tavus concurrency and minutes).
-- Calls are capped by `AVATAR_CALL_COOLDOWN_MS` (default 20 s) and `AVATAR_MAX_CALLS` (default 30 per server start).
+- Typed briefs never use video minutes; only "Start video call" does.
+
+### Protecting the Tavus minutes
+The Tavus plan has a small monthly allowance (20 minutes), and the demo is public, so video calls are limited. All of these are optional Railway variables; the defaults suit a 20-minute plan:
+
+| Variable | Default | What it does |
+|---|---|---|
+| `AVATAR_ENABLED` | on | Set to `0` to switch video calls off at once (the page tells shoppers they can still type). |
+| `AVATAR_MAX_CALL_SECONDS` | `120` | Longest any one call can run. |
+| `AVATAR_BUDGET_SECONDS` | `1080` | Seconds of video to spend per calendar month (UTC): 18 of the 20 minutes. A call reserves its length up front and gives back what it didn't use when it ends. |
+| `AVATAR_CALLS_PER_VISITOR` | `1` | Calls per visitor per day (best effort, by forwarded IP). |
+| `AVATAR_CALL_COOLDOWN_MS` | `20000` | Gap between any two calls. |
+| `AVATAR_MAX_CALLS` | `30` | Calls per server start. |
+
+The counters are held in memory, so a redeploy or restart resets them. If you redeploy mid-month, lower `AVATAR_BUDGET_SECONDS` to what is really left. If the Tavus plan changes, change the budget to match.
 
 ## Things that still point at the original project
 - **Product photos** load from `https://mhalpert.github.io/mens-fashion-barn/data/catalog/` (`site/app.js`, `server/mcp.js`). They are not in this repo (718 MB). If that site goes away, photos break.
